@@ -1,0 +1,111 @@
+<include file="public@header" />
+</head>
+<body>
+<div class="wrap">
+	<ul class="nav nav-tabs">
+		<li><a href="{:url('Business/index')}">业务管理</a></li>
+		<li class="active"><a href="{:url('Business/formal_add')}">新增正式申请业务</a></li>
+	</ul>
+	<form method="post" class="form-horizontal js-ajax-form margin-top-20" autocomplete="off" action="{:url('Business/formal_add_post')}">
+		<div class="form-group">
+			<label for="input-number" class="col-sm-2 control-label"><span class="form-required">*</span>业务编号</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="text" class="form-control" id="input-number" name="number" maxlength="25" placeholder="请输入业务编号">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>客户名称</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="text" class="form-control" id="input-name" name="name" maxlength="25" placeholder="请输入客户名称">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-address" class="col-sm-2 control-label"><span class="form-required">*</span>安装地址</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="text" class="form-control" id="input-address" maxlength="50" name="address" placeholder="请输入安装地址">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-contact" class="col-sm-2 control-label"><span class="form-required">*</span>联系人</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="text" class="form-control" id="input-contact" name="contact" maxlength="25" placeholder="请输入联系人姓名">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-mobile" class="col-sm-2 control-label"><span class="form-required">*</span>联系电话</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="text" class="form-control" id="input-mobile" maxlength="11" name="contact_mobile" placeholder="请输入联系电话">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-owner" class="col-sm-2 control-label"><span class="form-required">*</span>房屋权属</label>
+			<div class="col-md-6 col-sm-10">
+				<select id="input-owner" name="owner_type" class="form-control">
+					<option value="1">自住</option>
+					<option value="2">租赁</option>
+					<option value="3">其他</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-nature" class="col-sm-2 control-label"><span class="form-required">*</span>用气性质</label>
+			<div class="col-md-6 col-sm-10">
+				<select id="input-nature" name="nature_id" class="form-control">
+					<foreach name="nature" item="vn">
+						<option value="{$vn.id}">{$vn.name}</option>
+					</foreach>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-limit" class="col-sm-2 control-label"><span class="form-required">*</span>是否限制时间</label>
+			<div class="col-md-6 col-sm-10">
+				<select id="input-limit" name="limit_type" class="form-control">
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-house-num" class="col-sm-2 control-label"><span class="form-required">*</span>包含户数(户)</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="number" class="form-control" id="input-house-num" name="house_num" placeholder="请输入包含户数,0或正整数">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-gas-num" class="col-sm-2 control-label"><span class="form-required">*</span>合计用气量(m³)</label>
+			<div class="col-md-6 col-sm-10">
+				<select id="input-gas-num" name="gas_type" class="form-control">
+					<foreach name="gas" item="vg">
+						<option value="{$vg.type}" data-action="{$vg.name}">{$vg.name}</option>
+					</foreach>
+				</select>
+				<input type="number" style="margin-top: 8px;display: none;" class="form-control" id="gas_num" name="gas_num" value="{$gas[0]['name']}">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="submit" class="btn btn-info js-ajax-submit">{:lang('SAVE')}</button>
+				<a href="javascript:history.back(-1);" style="margin-left: 30px;" class="btn btn-default">取消</a>
+			</div>
+		</div>
+	</form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript">
+	//切换合计用气量
+	$("#input-gas-num").on('change',function () {
+	    var the_type = parseInt($(this).val());
+	    var the_num = $(this).find("option:selected").attr('data-action');
+	    var input_gas_num = $("#gas_num");
+	    if(the_type === 9){
+            input_gas_num[0].style.display='block';
+            input_gas_num.val('');
+		}else{
+            input_gas_num[0].style.display='none';
+            input_gas_num.val(the_num);
+		}
+    })
+</script>
+</body>
+</html>

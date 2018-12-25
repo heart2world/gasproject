@@ -1,0 +1,148 @@
+<include file="public@header"/>
+<script src="/static/js/layer/layer.js"></script>
+<script src="/static/js/laydate/laydate.js"></script>
+<style>
+    #period_list td span{
+        color: #3498db;
+        cursor: pointer;
+    }
+    #data_main .item{
+        padding-bottom:10px ;
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <assign name="action" value="$Request.controller"/>
+    <ul class="nav nav-tabs">
+        <li><a href='{:url("$action/index")}'>预收账款管理</a></li>
+        <li class="active"><a href='{:url("$action/create")}'>新增预收账款</a></li>
+    </ul>
+    <form method="post" class="form-horizontal  margin-top-20" id="form" action='{:url("$action/save")}'>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">所属业务编号</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control"
+                       autocomplete="off"
+                       style="width:200px" placeholder="请输入所属业务编号"
+                       name="business_number">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">各期收款情况</label>
+            <div class="col-md-6 col-sm-10">
+                <div style="padding-bottom:15px">
+                    <button type="button" class="btn btn-info" id="add_new">新增账期</button>
+                </div>
+                <table class="table table-hover table-bordered" id="period_list">
+
+                    <thead>
+                        <tr>
+                            <th width="140"></th>
+                            <th>应收账款额</th>
+                            <th>应交款时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody v-cloak>
+                        <tr v-if="list.length===0" style="background: #f5f5f5">
+                            <td colspan="4">暂无数据</td>
+                        </tr>
+                        <tr v-else v-for="(item,index) in list">
+
+                            <td :data-id="item.period=(index+1)" > 第 {{item.period}} 期 </td>
+                            <td>{{item.receivable_amount}} </td>
+                            <td>{{item.receivable_time}} </td>
+                            <td><span @click="edit(index)">编辑</span> / <span @click="del(index)">删除</span></td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary js-ajax-submit">保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/v.min.js"></script>
+<script src="__STATIC__/js/template.js"></script>
+<script type="text/html" id="content">
+    <form id="data_main">
+        <div class="item">第 <%=data.period %> 期 <input type="hidden" name="period" value="<%=data.period%>"></div>
+        <div class="item"><input type="number" autocomplete="off" name="receivable_amount" class="form-control"  value="<%=data.receivable_amount%>" placeholder="输入应收账款额"></div>
+        <div class="item"><input type="text" autocomplete="off"  id="date" name="receivable_time" class="form-control"  value="<%=data.receivable_time%>" placeholder="应交款时间"  /></div>
+    </form>
+</script>
+<script>
+    var app = new Vue({
+        el: '#period_list',
+        data: {list: []},
+        methods:{
+            del:function (index) {
+                app.list.splice(index,1);
+            },
+            edit:function (index) {
+                modelBox("编辑收款期数",app.list[index],index);
+            }
+        }
+    });
+
+    $("#add_new").on("click", function () {
+        var period = app.list.length>0?(app.list[app.list.length-1].period+1):1;
+        if (period>10){
+            layer.msg("最多添加10期!",{icon:2});return false;
+        }
+        var data = {period: period, receivable_amount: "", receivable_time: ""};
+         modelBox("新增收款期数",data);
+    });
+
+
+    function modelBox(title,data,isEdit) {
+        layer.open({
+            title: title,
+            shadeClose:true,
+            content:template($("#content").html(),{data:data}),
+            yes:function (index) {
+                call(index,isEdit)
+            }
+        });
+        initDate("#date");
+    }
+
+
+    function call(index,isEdit) {
+       var data = $("#data_main").formData();
+       if (typeof isEdit==='number'){
+           app.list[isEdit] = data;
+           app.$forceUpdate();
+       } else{
+           app.list = app.list.concat(data);
+       }
+        layer.close(index);
+    }
+
+   function initDate(e) {
+       laydate.render({
+           elem: e //指定元素
+       });
+   }
+
+   $("#form").submit(function () {
+
+       var data = $(this).formData();
+       data.list =  app.list;
+       console.log(data);
+       request({
+           data: data
+       });
+       return false;
+   })
+</script>
+</body>
+</html>

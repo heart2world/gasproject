@@ -1,0 +1,182 @@
+<include file="public@header" />
+<style>
+	.form-group div{
+		line-height: 30px;
+		padding-top: 2px;
+	}
+	#data_main label{
+		padding: 5px;
+	}
+	td span{
+		color: #3498db;
+		cursor: pointer;
+	}
+</style>
+</head>
+<body>
+<assign name="action" value="$Request.controller"/>
+<div class="wrap">
+	<ul class="nav nav-tabs">
+		<li><a href='{:url("$action/index")}'>预收账款管理</a></li>
+		<li class="active"><a href="#">编辑预收账款</a></li>
+	</ul>
+
+	<form class="form-horizontal js-ajax-form margin-top-20" role="form">
+		<div class="form-group">
+			<label  class="col-sm-2 control-label">预收账款编号</label>
+			<div class="col-md-6 col-sm-6">{$id}</div>
+		</div>
+		<div class="form-group">
+			<label  class="col-sm-2 control-label">客户名称</label>
+			<div class="col-md-6 col-sm-10">{$name}</div>
+		</div>
+
+		<div class="form-group">
+			<label  class="col-sm-2 control-label">所属业务编号</label>
+			<div class="col-md-6 col-sm-10">{$business_number}</div>
+		</div>
+
+		<div class="form-group">
+			<label  class="col-sm-2 control-label">当前期数</label>
+			<div class="col-md-6 col-sm-10">第 {$curr_period} 期</div>
+		</div>
+		<div class="form-group">
+			<label  class="col-sm-2 control-label">当前收款额</label>
+			<div class="col-md-6 col-sm-10">{$actual_sum}</div>
+		</div>
+		<div class="form-group">
+			<label  class="col-sm-2 control-label">剩余收款额</label>
+			<div class="col-md-6 col-sm-10">{$surplus_sum}</div>
+		</div>
+
+		<div class="form-group">
+			<label  class="col-sm-2 control-label">各期收款情况</label>
+			<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered" id="period_list">
+
+						<thead>
+						<tr>
+							<th width="140"></th>
+							<th>应收账款额</th>
+							<th>应交款时间</th>
+							<th>实际交款时间</th>
+							<th>操作</th>
+						</tr>
+						</thead>
+						<tbody v-cloak>
+						<tr v-if="list.length===0" style="background: #f5f5f5">
+							<td colspan="5">暂无数据</td>
+						</tr>
+						<tr v-else v-for="(item,index) in list">
+
+							<td :data-id="item.period?item.period:(index+1)" > 第 {{item.period}} 期 </td>
+							<td>{{item.receivable_amount}} </td>
+							<td>{{item.receivable_time}} </td>
+							<td v-text="item.actual_time||'——'"></td>
+							<td><span @click="edit(index)">编辑</span> / <span @click="del(index)">删除</span></td>
+
+						</tr>
+						</tbody>
+					</table>
+					<button  type="button"  class="btn btn-primary" id="save">保存</button>
+			</div>
+		</div>
+		<div class="form-group">
+			<label  class="col-sm-2 control-label">负责人</label>
+			<div class="col-md-6 col-sm-10">{$manager_name}</div>
+		</div>
+	</form>
+</div>
+<script src="/static/js/layer/layer.js"></script>
+<script src="/static/js/laydate/laydate.js"></script>
+<script src="__STATIC__/js/admin.js"></script>
+
+<script src="__STATIC__/js/v.min.js"></script>
+<script src="__STATIC__/js/template.js"></script>
+<script type="text/html" id="content">
+	<form id="data_main">
+		<input type="hidden" name="id" value="<%=data.id %>">
+		<div class="item">第 <%=data.period %> 期 <input type="hidden" name="period" value="<%=data.period%>"></div>
+		<div class="item"><label>输入应收账款额</label><input type="text" name="receivable_amount" class="form-control"  value="<%=data.receivable_amount%>" placeholder="输入应收账款额"></div>
+		<div class="item"><label>应交款时间</label><input type="text" id="date" name="receivable_time" class="form-control"  value="<%=data.receivable_time%>" placeholder="应交款时间"  /></div>
+		<% if (data.actual_time){%>
+		<div class="item"><label>实际交款时间</label><input type="text" id="date_2" name="actual_time" class="form-control"  value="<%=data.actual_time%>" placeholder="实际交款实际"  /></div>
+		<% } %>
+	</form>
+</script>
+<assign name="action" value="$Request.controller"/>
+<script>
+    var advance_id = "{:input('id')}";
+    var remove=[];
+    var app = new Vue({
+        el: '#period_list',
+        data: {list: []},
+        methods:{
+            del:function (index) {
+   	         var item= app.list.splice(index,1);
+   	         console.log(item[0])
+                remove.push(item[0].id);
+            },
+            edit:function (index) {
+                modelBox("编辑收款期数",app.list[index],index);
+            }
+        }
+    });
+
+
+
+
+    request({
+		data:{id:advance_id},
+		success:function (result) {
+            result.forEach(function (item) {
+				item.actual_time = timeToDate(item.actual_time)
+				item.receivable_time = timeToDate(item.receivable_time)
+            });
+            app.list = result;
+        }
+	})
+
+    function modelBox(title,data,isEdit) {
+        layer.open({
+            title: title,  shadeClose:true,
+            content:template($("#content").html(),{data:data}),
+            yes:function (index) {
+                call(index,isEdit)
+            }
+        });
+        initDate("#date");
+        initDate("#date_2");
+    }
+
+
+    function call(index,isEdit) {
+        var data = $("#data_main").formData();
+        if (typeof isEdit==='number'){
+            app.list[isEdit] = data;
+            app.$forceUpdate();
+        } else{
+            app.list = app.list.concat(data);
+        }
+        layer.close(index);
+    }
+
+    function initDate(e) {
+        laydate.render({
+            elem: e //指定元素
+        });
+    }
+
+    $("#save").on("click",function () {
+        console.log(app.list,remove)
+        request({
+			url:'{:url("$action/update")}',
+            data:{list:app.list,del:remove}
+        });
+    });
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<include file="public@header" />
+<script src="/static/js/layer/layer.js"></script>
+</head>
+<body>
+<assign name="action" value="$Request.controller"/>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('business/index')}">业务管理</a></li>
+        <li><a href="{:url('business/time_list')}">流程时间管理</a></li>
+        <li class="active"><a href='{:url("$action/business")}'>业务统计</a></li>
+        <li><a href='{:url("$action/overtime")}'>超时统计</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="post" action='{:url("$action/business")}'>
+         时间:
+        <input type="text" class="form-control" id="start_time" name="start_time"
+               placeholder="开始时间"
+               value="{:input('start_time')}"
+               style="width: 140px;" autocomplete="off"> -
+        <input type="text" class="form-control" id="end_time" name="end_time"
+               placeholder="结束时间"
+               value="{:input('end_time')}"
+               style="width: 140px;" autocomplete="off">
+        <input type="submit" class="btn btn-primary" value="搜索" />
+        <a class="btn btn-danger" href='{:url("$action/business")}'>清空</a>
+    </form>
+    <table class="table table-hover table-bordered">
+        <thead>
+        <tr>
+            <th>\</th>
+            <foreach name="hs_field_data" item="v">
+                <th>{$v.field}</th>
+            </foreach>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>已受理户数</td>
+                <foreach name="hs_field_data" item="v">
+                    <td>{$v.sl_house_num}</td>
+                </foreach>
+            </tr>
+            <tr>
+                <td>已通气户数</td>
+                <foreach name="hs_field_data" item="v">
+                    <td>{$v.tq_house_num}</td>
+                </foreach>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-hover table-bordered">
+        <thead>
+        <tr>
+            <th>\</th>
+            <foreach name="gas_field_data" item="f">
+                <th>{$f.field}</th>
+            </foreach>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>已受理户数</td>
+            <foreach name="gas_field_data" item="v">
+                <td>{$v.sl_house_num}</td>
+            </foreach>
+        </tr>
+        <tr>
+            <td>已通气户数</td>
+            <foreach name="gas_field_data" item="v">
+                <td>{$v.tq_house_num}</td>
+            </foreach>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="/static/js/laydate/laydate.js"></script>
+<script>
+    laydate.render({
+        elem: "#start_time" //指定元素
+    });
+    laydate.render({
+        elem: "#end_time" //指定元素
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<include file="public@header" />
+<style type="text/css">
+	.layui-layer-btn-{text-align: center !important;}
+	.layui-layer-btn0{margin-right: 20px !important;}
+	.form-group{margin-left: 0 !important;margin-right: 0 !important;}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+	<ul class="nav nav-tabs">
+		<li><a href="{:url('Business/info',array('id'=>$id))}">基本信息</a></li>
+		<li class="active"><a href="">流程信息</a></li>
+	</ul>
+	<table class="table table-hover table-bordered" style="margin-top: 20px;">
+		<thead>
+			<tr>
+				<th width="80">序号</th>
+				<th>状态名称</th>
+				<th>完成时间节点</th>
+				<th>耗时(天)</th>
+				<th>预计耗时(天)</th>
+				<th>受理部门</th>
+				<th>责任人</th>
+				<th>责任人联系方式</th>
+				<th>备注</th>
+			</tr>
+		</thead>
+		<tbody>
+			<foreach name="process" item="vo">
+			<tr>
+				<td>{$key+1}</td>
+				<td>{$vo.name}</td>
+				<td><php>echo date('Y-m-d H:i:s',$vo['create_time']);</php></td>
+				<td>
+					<if condition="$vo.step eq 1">
+						——
+						<else/>
+						{$vo.day}
+					</if>
+				</td>
+				<td>
+					<if condition="($limits eq 0) OR ($vo.step eq 1)">
+						——
+						<else/>
+						{$vo.expected_day}
+					</if>
+				</td>
+				<td>{$vo.department}</td>
+				<td>{$vo.user_nickname}</td>
+				<td>{$vo.mobile}</td>
+				<td>{$vo.remark}</td>
+			</tr>
+			</foreach>
+		</tbody>
+	</table>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/laydate/laydate.js"></script>
+<script src="__STATIC__/js/layer/layer.js"></script>
+<script type="text/javascript">
+    //执行laydate
+    laydate.render({elem: '#begin_time',type: 'datetime'});
+    laydate.render({elem: '#end_time',type: 'datetime'});
+
+    //新增内审
+	$(".editTime").on('click',function () {
+	    var the_id = parseInt($(this).attr('data-id'));
+	    var the_name = $(this).attr('data-name');
+	    var the_day = $(this).attr('data-action');
+	    if(the_id > 0) {
+            var html = '<div class="form-horizontal margin-top-20">' +
+					'<div class="form-group">'+
+                '		<label class="col-sm-4 control-label">状态名称</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<label class="form-control" style="border: none !important;">'+the_name+'</label>' +
+                '		</div>' +
+					'</div><div class="form-group">'+
+                '		<label for="expected_day" class="col-sm-4 control-label">预计耗时(天)</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<input type="number" class="form-control" autocomplete="off" value="'+the_day+'" id="expected_day" name="expected_day" placeholder="预计耗时天数(0或正整数)">' +
+                '		</div></div>' +
+                '</div>';
+            layer.open({
+                title: '编辑时间'
+                , content: html
+                , type: 1
+                , area: ['400px', '240px']
+                , btn: ['保存', '取消']
+                , yes: function () {
+                    var expected_day = $("#expected_day").val();
+                    var day_test = /^(0|\+?[1-9][0-9]*)$/;
+                    if(!day_test.test(expected_day)){
+                        layer.msg("预计耗时天数请输入0或正整数",{icon:2,time:2000});
+                        return;
+					}
+                    layer.confirm('确定保存该流程时间？', {icon: 3, title: '提示'}, function (index2) {
+                        $.ajax({
+                            type: 'POST',
+                            url: '{:url("Admin/Business/time_post")}',
+                            data: {id:the_id,day: expected_day},
+                            success: function (res) {
+                                if (res.code === 1) {
+                                    layer.msg(res.msg, {icon: 1, time: 2000}, function () {
+                                        location.reload();
+                                    });
+                                } else {
+                                    layer.msg(res.msg, {icon: 2, time: 2000});
+                                }
+                            }
+                        });
+                        layer.close(index2);
+                    });
+                }, btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+        }
+    })
+</script>
+</body>
+</html>

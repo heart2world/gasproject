@@ -1,0 +1,100 @@
+<include file="public@header" />
+<style type="text/css">
+	.none_border{border: none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+	<ul class="nav nav-tabs">
+		<li class="active"><a href="">基本信息</a></li>
+		<li><a href="{:url('Business/process',array('id'=>$business.id))}">流程信息</a></li>
+	</ul>
+	<div class="form-horizontal margin-top-20">
+		<div class="form-group">
+			<label class="col-sm-2 control-label">业务编号</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">{$business.number}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">客户名称</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">{$business.name}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">安装地址</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">{$business.address}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">联系人</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">{$business.contact}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">联系电话</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">{$business.contact_mobile}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">包含户数</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">
+					{$business.house_num}<if condition="$business.house_num neq ''">户</if>
+				</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">合计用气量</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">
+					{$business.gas_num}<if condition="$business.gas_num neq ''">m³</if>
+				</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">房屋权属</label>
+			<div class="col-md-6 col-sm-10">
+				<php>$owner_types = array('1'=>'自住','2'=>'租赁','3'=>'其他');</php>
+				<label class="form-control none_border">{$owner_types[$business['owner_type']]}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">用气性质</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">{$business.nature_name}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">是否限制时间</label>
+			<div class="col-md-6 col-sm-10">
+				<php>$status_lists = array('0'=>'否','1'=>'是');</php>
+				<label class="form-control none_border">{$status_lists[$business['limit_type']]}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">受理时间</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border"><php>echo date('Y-m-d H:i:s',$business['create_time']);</php></label>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">当前状态</label>
+			<div class="col-md-6 col-sm-10">
+				<label class="form-control none_border">{$business.status_name}</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<a href="javascript:history.back(-1);" class="btn btn-default">返回</a>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

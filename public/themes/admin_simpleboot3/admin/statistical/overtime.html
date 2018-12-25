@@ -1,0 +1,76 @@
+<include file="public@header" />
+<script src="/static/js/layer/layer.js"></script>
+<style>
+	.error{color: red; font-weight: bold}
+</style>
+</head>
+<body>
+<assign name="ctl" value="$Request.controller"/>
+<assign name="action" value="$Request.action"/>
+<div class="wrap js-check-wrap">
+	<ul class="nav nav-tabs">
+		<li><a href="{:url('business/index')}">业务管理</a></li>
+		<li><a href="{:url('business/time_list')}">流程时间管理</a></li>
+		<li ><a href='{:url("$ctl/business")}'>业务统计</a></li>
+		<li class="active"><a href='{:url("$ctl/$action")}'>超时统计</a></li>
+	</ul>
+	<form class="well form-inline margin-top-20" method="post" action='{:url("$ctl/$action")}'>
+		时间:
+		<input type="text" class="form-control" id="start_time" name="start_time"
+			   placeholder="开始时间"
+			   value="{:input('start_time')}"
+			   style="width: 140px;" autocomplete="off"> -
+		<input type="text" class="form-control" id="end_time" name="end_time"
+			   placeholder="结束时间"
+			   value="{:input('end_time')}"
+			   style="width: 140px;" autocomplete="off">
+		<input type="submit" class="btn btn-primary" value="搜索" />
+		<a class="btn btn-danger" href='{:url("$ctl/$action")}'>清空</a>
+	</form>
+	<table class="table table-hover table-bordered">
+		<thead>
+		<tr>
+			<th>客户名称</th>
+			<th>状态名称</th>
+			<th>完成时间</th>
+			<th>预计耗时(天)</th>
+			<th>实际耗时(天)</th>
+			<th>受理部门</th>
+			<th>责任人</th>
+			<th>备注</th>
+
+		</tr>
+		</thead>
+		<tbody>
+
+			<foreach name="list" item="v">
+				<tr>
+					<td>{$v.username}</td>
+					<td>{$v.name}</td>
+					<td>{:date('Y-m-d H:i:s',$v['create_time'])}</td>
+					<td>{$v.expected_day}</td>
+					<td class="error">{$v.day}</td>
+					<td>{$v.department}</td>
+					<td>{$v.manager_name}</td>
+					<td>{$v.remark}</td>
+				</tr>
+			</foreach>
+		</tbody>
+	</table>
+
+
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script src="/static/js/laydate/laydate.js"></script>
+<script src="__STATIC__/js/template.js"></script>
+<script>
+    laydate.render({
+        elem: "#start_time" //指定元素
+    });
+    laydate.render({
+        elem: "#end_time" //指定元素
+    });
+</script>
+</body>
+</html>

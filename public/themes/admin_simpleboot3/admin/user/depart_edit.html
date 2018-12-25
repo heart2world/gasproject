@@ -1,0 +1,33 @@
+<include file="public@header" />
+</head>
+<body>
+<div class="wrap">
+	<ul class="nav nav-tabs">
+		<li><a href="{:url('user/department')}">部门管理</a></li>
+		<li class="active"><a href="">编辑部门</a></li>
+	</ul>
+	<form method="post" class="form-horizontal js-ajax-form margin-top-20" autocomplete="off" action="{:url('user/depart_edit_post')}">
+		<div class="form-group">
+			<label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>部门名称</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="text" class="form-control" id="input-name" name="name" value="{$depart.name}" maxlength="25" placeholder="请输入部门名称">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="input-telephone" class="col-sm-2 control-label"><span class="form-required">*</span>部门电话</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="text" class="form-control" id="input-telephone" maxlength="11" name="telephone" value="{$depart.telephone}" placeholder="请输入手机号或座机号，11位">
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<input type="hidden" name="id" value="{$depart.id}">
+				<button type="submit" class="btn btn-info js-ajax-submit">{:lang('SAVE')}</button>
+				<a href="javascript:history.back(-1);" style="margin-left: 30px;" class="btn btn-default">取消</a>
+			</div>
+		</div>
+	</form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

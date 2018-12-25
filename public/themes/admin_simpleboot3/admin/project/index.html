@@ -1,0 +1,127 @@
+<include file="public@header" />
+<style type="text/css">
+	.layui-layer-btn-{text-align: center !important;}
+	.layui-layer-btn0{margin-right: 20px !important;}
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+	<ul class="nav nav-tabs">
+		<li class="active"><a href="{:url('Project/index')}">内审资料</a></li>
+	</ul>
+	<form class="well form-inline margin-top-20" method="post" autocomplete="off" action="{:url('Project/index')}">
+		文本搜索：
+		<input type="text" class="form-control" name="keyword" style="width: 220px;" value="{:input('request.keyword/s','')}" placeholder="请输入内审项目/发起人/审核人">
+		时间类型：
+		<select name="time_type" class="form-control">
+			<option value="">全部</option>
+			<option value="1" <if condition="input('request.time_type/s','') eq 1">selected</if>>发起时间</option>
+			<option value="2" <if condition="input('request.time_type/s','') eq 2">selected</if>>审核时间</option>
+		</select>
+		<input type="text" class="form-control" name="begin_time" id="begin_time" value="{:input('request.begin_time/s','')}" placeholder="开始时间">—
+		<input type="text" class="form-control" name="end_time" id="end_time" value="{:input('request.end_time/s','')}" placeholder="结束时间">
+		发起部门：
+		<select name="depart_id" class="form-control">
+			<option value="">全部</option>
+			<foreach name="depart" item="vd">
+				<option value="{$vd.id}" <if condition="input('request.depart_id/s','') eq $vd.id">selected</if>>{$vd.name}</option>
+			</foreach>
+		</select>
+		<br><br>
+		状态：
+		<select name="status" class="form-control">
+			<option value="">全部</option>
+			<option value="1" <if condition="input('request.status/s','') eq 1">selected</if>>已审核</option>
+			<option value="2" <if condition="input('request.status/s','') eq 2">selected</if>>未审核</option>
+		</select>
+		<input type="submit" class="btn btn-primary" value="搜索" style="margin-right: 20px;" />
+		<input type="button" class="btn btn-info" id="newProject" value="新增内审">
+	</form>
+	<table class="table table-hover table-bordered">
+		<thead>
+			<tr>
+				<th width="80">内审编号</th>
+				<th>内审项目</th>
+				<th>发起人</th>
+				<th>发起部门</th>
+				<th>发起时间</th>
+				<th>审核人</th>
+				<th>审核时间</th>
+				<th width="120">状态</th>
+			</tr>
+		</thead>
+		<tbody>
+		<if condition="empty($lists)">
+			<tr><td colspan="8">暂无数据~</td></tr>
+		</if>
+			<foreach name="project" item="vo">
+			<tr>
+				<td>{$vo.id}</td>
+				<td>{$vo.name}</td>
+				<td>{$vo.user_nickname}</td>
+				<td>{$vo.department}</td>
+				<td>{$vo.create_time}</td>
+				<td>{$vo.verify_name}</td>
+				<td>{$vo.update_time}</td>
+				<td>
+					<if condition="$vo['status'] eq 1">
+						<font color="gray">已审核</font>
+						<else />
+						<a href="{:url('Project/verify_action',array('id'=>$vo['id']))}" class="js-ajax-dialog-btn" data-msg="确定要审核该项目吗？">未审核</a>
+					</if>
+				</td>
+			</tr>
+			</foreach>
+		</tbody>
+	</table>
+	<div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/laydate/laydate.js"></script>
+<script src="__STATIC__/js/layer/layer.js"></script>
+<script type="text/javascript">
+    //执行laydate
+    laydate.render({elem: '#begin_time',type: 'datetime'});
+    laydate.render({elem: '#end_time',type: 'datetime'});
+
+    //新增内审
+	$("#newProject").on('click',function () {
+	    var html='<div class="form-horizontal margin-top-20">'+
+            '		<label for="pro_name" class="col-sm-3 control-label">内审项目</label>'+
+            '		<div class="col-md-9 col-sm-10">'+
+            '			<input type="text" class="form-control" autocomplete="off" id="pro_name" name="name" maxlength="50" placeholder="请输入内审项目名称">'+
+            '		</div>'+
+            '</div>';
+        layer.open({
+            title: '新增内审'
+            , content: html
+            , type :1
+            , area: ['360px', '180px']
+            , btn: ['新增', '取消']
+            , yes: function () {
+                var pro_name = $("#pro_name").val().trim();
+                layer.confirm('确定新增该内审项目？', {icon: 3, title:'提示'}, function(index2){
+                    $.ajax({
+						type: 'POST',
+						url: '{:url("Admin/Project/add_post")}',
+						data:{name:pro_name},
+						success: function (res) {
+							if(res.code === 1){
+							    layer.msg(res.msg,{icon:1,time:2000},function () {
+									location.reload();
+                                });
+							}else{
+							    layer.msg(res.msg,{icon:2,time:2000});
+							}
+                        }
+					});
+                    layer.close(index2);
+                });
+            },btn2: function(index){
+                layer.close(index);
+            }
+        });
+    })
+</script>
+</body>
+</html>

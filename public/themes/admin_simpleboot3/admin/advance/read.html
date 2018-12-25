@@ -1,0 +1,89 @@
+<include file="public@header" />
+<style>
+	.form-group div{
+		line-height: 30px;
+		padding-top: 2px;
+	}
+	tbody tr:nth-child({$curr_period}){
+		background: #f5f5f5;
+	}
+</style>
+</head>
+<body>
+	<assign name="action" value="$Request.controller"/>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li><a href='{:url("$action/index")}'>预收账款管理</a></li>
+			<li class="active"><a href="#">预收账款详情</a></li>
+		</ul>
+
+		<form class="form-horizontal js-ajax-form margin-top-20" role="form" method="post" action='{:url("$action/save")}'>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">预收账款编号</label>
+				<div class="col-md-6 col-sm-6">{$id}</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">客户名称</label>
+				<div class="col-md-6 col-sm-10">{$name}</div>
+			</div>
+
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">所属业务编号</label>
+				<div class="col-md-6 col-sm-10">{$business_number}</div>
+			</div>
+
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">当前期数</label>
+				<div class="col-md-6 col-sm-10">第 {$curr_period} 期</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">当前收款额</label>
+				<div class="col-md-6 col-sm-10">{$actual_sum}</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">剩余收款额</label>
+				<div class="col-md-6 col-sm-10">{$surplus_sum}</div>
+			</div>
+
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">各期收款情况</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered">
+						<thead>
+						<tr>
+							<th></th>
+							<th>应收账款额</th>
+							<th>应交款时间</th>
+							<th>实际交款时间</th>
+						</tr>
+						</thead>
+						<tbody>
+
+						<foreach name="list" item="vo">
+							<tr>
+								<td>第 <span>{$vo.period}</span> 期</td>
+								<td>{$vo.receivable_amount}</td>
+								<td>{$vo['receivable_time']>0?date('Y-m-d',$vo['receivable_time']):'——'}</td>
+								<td>{$vo['actual_time']>0?date('Y-m-d',$vo['actual_time']):'——'}</td>
+							</tr>
+						</foreach>
+						<tr>
+							<td>总计</td>
+							<td>{$receivable_sum}</td>
+							<td>——</td>
+							<td>——</td>
+						</tr>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">负责人</label>
+				<div class="col-md-6 col-sm-10">{$manager_name}</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

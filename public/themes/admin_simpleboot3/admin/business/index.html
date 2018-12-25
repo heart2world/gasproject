@@ -1,0 +1,271 @@
+<include file="public@header" />
+<style type="text/css">
+	.layui-layer-btn-{text-align: center !important;}
+	.layui-layer-btn0{margin-right: 20px !important;}
+	.form-group{margin-left: 0 !important;margin-right: 0 !important;}
+</style>
+</head>
+<body>
+
+<div class="wrap js-check-wrap">
+	<ul class="nav nav-tabs">
+		<li class="active"><a href="{:url('Business/index')}">业务管理</a></li>
+		<li><a href="{:url('Business/time_list')}">流程时间管理</a></li>
+		<li><a href="{:url('statistical/business')}">业务统计</a></li>
+		<li><a href="{:url('statistical/overtime')}">超时统计</a></li>
+	</ul>
+	<form class="well form-inline margin-top-20" method="post" autocomplete="off" action="{:url('Business/index')}">
+		文本搜索：
+		<input type="text" class="form-control" name="keyword" style="width: 300px;" value="{:input('request.keyword/s','')}" placeholder="请输入业务编号/客户名称/联系人/联系电话">
+		当前状态：
+		<select name="status" class="form-control">
+			<option value="">全部</option>
+			<foreach name="times" item="vt">
+			<option value="{$vt.id}" <if condition="input('request.status/s','') eq $vt.id">selected</if>>{$vt.name}</option>
+			</foreach>
+		</select>
+		受理时间：
+		<input type="text" class="form-control" name="begin_time" id="begin_time" value="{:input('request.begin_time/s','')}" placeholder="开始时间">—
+		<input type="text" class="form-control" name="end_time" id="end_time" value="{:input('request.end_time/s','')}" placeholder="结束时间">
+		<input type="submit" class="btn btn-primary" value="搜索" />
+		<br><br>
+		<a href="{:url('Business/reservation_add')}" class="btn btn-info" id="reservation" style="margin-right: 20px;">新增预约业务</a>
+		<a href="{:url('Business/formal_add')}" class="btn btn-success" id="formal" >新增正式申请业务</a>
+	</form>
+	<table class="table table-hover table-bordered">
+		<thead>
+			<tr>
+				<th width="80">业务编号</th>
+				<th>客户名称</th>
+				<th>安装地址</th>
+				<th>联系人</th>
+				<th>联系电话</th>
+				<th>包含户数</th>
+				<th>受理时间</th>
+				<th>当前状态</th>
+				<th width="120">{:lang('ACTIONS')}</th>
+			</tr>
+		</thead>
+		<tbody>
+		<if condition="empty($lists)">
+			<tr><td colspan="9">暂无数据~</td></tr>
+		</if>
+			<foreach name="business" item="vo">
+			<tr>
+				<td>{$vo.number}</td>
+				<td>{$vo.name}</td>
+				<td>{$vo.address}</td>
+				<td>{$vo.contact}</td>
+				<td>{$vo.contact_mobile}</td>
+				<td>
+					<if condition="$vo.type eq 1 && $vo.status elt 2">
+						——
+						<else/>
+						{$vo.house_num}
+					</if>
+				</td>
+				<td><php>echo date('Y-m-d H:i:s',$vo['create_time']);</php></td>
+				<td>{$vo.status_name}</td>
+				<td>
+					<a href='{:url("Business/info",array("id"=>$vo["id"]))}'>查看</a>
+					<a href='{:url("Business/business",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a>
+					<a href='javascript:;' class="conversion" data-type="{$vo.type}" data-id="{$vo.id}" data-number="{$vo.number}" data-status="{$vo.status}" data-action="{$vo.status_name}">转化</a>
+				</td>
+			</tr>
+			</foreach>
+		</tbody>
+	</table>
+	<div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__STATIC__/js/laydate/laydate.js"></script>
+<script src="__STATIC__/js/layer/layer.js"></script>
+<script type="text/javascript">
+    //执行laydate
+    laydate.render({elem: '#begin_time',type: 'datetime'});
+    laydate.render({elem: '#end_time',type: 'datetime'});
+
+    //转化
+	var action_code = 1;
+	$(".conversion").on('click',function () {
+	    var the_id = $(this).attr('data-id');
+	    var the_number = $(this).attr('data-number');
+	    var the_status = parseInt($(this).attr('data-status'));
+	    var the_status_name = $(this).attr('data-action');
+	    var the_type = parseInt($(this).attr('data-type'));
+        var html = '';
+        var $width = '400px';
+        var $height = '300px';
+        var $btn = [];
+        var $action_url = '';
+	    if(the_status === 2){
+	        var gas_list = JSON.parse('{$gas}');
+	        $width = '420px';
+            $height = '430px';
+            $btn = ["现场初勘转化为受理正式申请","回退至预约"];
+            $action_url = '{:url("Admin/Business/conversion_site")}';
+            html = '<div class="form-horizontal margin-top-20">' +
+                '<div class="form-group">' +
+                '		<label class="col-sm-4 control-label">当前业务状态:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<label class="form-control" style="border: none !important;">' + the_status_name + '</label>' +
+                '		</div>' +
+                '</div><div class="form-group">' +
+                '		<label class="col-sm-4 control-label"><span class="form-required">*</span>业务编号:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<input type="text" class="form-control" maxlength="25" id="number" placeholder="请输入业务编号">' +
+                '		</div>' +
+                '</div><div class="form-group">' +
+                '		<label class="col-sm-4 control-label"><span class="form-required">*</span>包含户数(户):</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<input type="number" class="form-control" id="house_num" placeholder="请输入包含户数">' +
+                '		</div>' +
+                '</div><div class="form-group">' +
+				'		<label class="col-sm-4 control-label"><span class="form-required">*</span>合计用气量(m³):</label>' +
+				'		<div class="col-md-8 col-sm-10">' +
+				'			<select id="input-gas-num" name="gas_type" class="form-control">';
+            for(var i=0;i<gas_list.length;i++){
+                html+='<option value="'+gas_list[i]['type']+'" data-action="'+gas_list[i]['name']+'">'+gas_list[i]['name']+'</option>';
+			}
+			html+='<input type="number" style="margin-top: 8px;display: none;" class="form-control" id="gas_num" name="gas_num" value="'+gas_list[0]['name']+'">';
+            html+='</select></div></div><div class="form-group">' +
+                '		<label for="expected_day" class="col-sm-4 control-label">备注:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<textarea class="form-control" style="resize:none;" id="remark" maxlength="100" placeholder="非必填"></textarea>' +
+                '		</div></div>' +
+                '</div>';
+		} else {
+	        if(the_status === 1){
+                $btn = ["预约转化为现场初勘"];
+                $action_url = '{:url("Admin/Business/conversion_reservation")}';
+			}else if(the_status === 3){
+	            if(the_type === 2){
+                    $btn = ["受理正式申请转化为设计"]
+				}else {
+                    $btn = ["受理正式申请转化为设计", "回退至现场初勘"];
+                }
+                $action_url = '{:url("Admin/Business/conversion_accept")}';
+			}else if(the_status === 4){
+                $btn = ["设计转化为预算","回退至受理正式申请"];
+                $action_url = '{:url("Admin/Business/conversion_design")}';
+            }else if(the_status === 5){
+                $btn = ["预算转化为预算审核","回退至设计"];
+                $action_url = '{:url("Admin/Business/conversion_budget")}';
+            }else if(the_status === 6){
+                $btn = ["预算审核转化为合同办理","回退至预算"];
+                $action_url = '{:url("Admin/Business/conversion_verify")}';
+            }else if(the_status === 7){
+                $btn = ["合同办理转化为缴费","回退至预算审核"];
+                $action_url = '{:url("Admin/Business/conversion_contract")}';
+            }else if(the_status === 8){
+                $btn = ["缴费转化为安装","回退至合同办理"];
+                $action_url = '{:url("Admin/Business/conversion_payment")}';
+            }else if(the_status === 9){
+                $btn = ["安装转化为通气","回退至缴费"];
+                $action_url = '{:url("Admin/Business/conversion_installation")}';
+            }else{
+                $btn = ["","回退至安装"];
+            }
+            html = '<div class="form-horizontal margin-top-20">' +
+                '<div class="form-group">' +
+                '		<label class="col-sm-4 control-label">当前业务编号:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<label class="form-control" style="border: none !important;">' + the_number + '</label>' +
+                '		</div>' +
+                '</div><div class="form-group">' +
+                '		<label class="col-sm-4 control-label">当前业务状态:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<label class="form-control" style="border: none !important;">' + the_status_name + '</label>' +
+                '		</div>' +
+                '</div><div class="form-group">' +
+                '		<label for="expected_day" class="col-sm-4 control-label">备注:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<textarea class="form-control" style="resize:none;" id="remark" maxlength="100" placeholder="非必填"></textarea>' +
+                '		</div></div>' +
+                '</div>';
+        }
+        layer.open({
+            title: '流程转化'
+            , content: html
+            , type :1
+            , area: [$width, $height]
+            , btn: $btn
+            , yes: function () {
+                var remark = $("#remark").val().trim();
+                var dataInfo = {};
+                if(the_status === 2){
+                    var input_number = $("#number").val().trim();
+                    var input_house_num = $("#house_num").val();
+                    var input_gas_type = $("#input-gas-num").val();
+                    var input_gas_num = $("#gas_num").val();
+                    dataInfo = {id:the_id,remark:remark,number:input_number,house_num:input_house_num,gas_num:input_gas_num,gas_type:input_gas_type};
+				}else{
+                    dataInfo = {id:the_id,remark:remark};
+				}
+                layer.confirm('确定转化到下个阶段？', {icon: 3, title:'提示'}, function(index2){
+                    if(action_code === 1) {
+                        action_code = 0;
+                        $.ajax({
+                            type: 'POST',
+                            url: $action_url,
+                            data: dataInfo,
+                            success: function (res) {
+                                if (res.code === 1) {
+                                    layer.msg(res.msg, {icon: 1, time: 2000}, function () {
+                                        location.reload();
+                                    });
+                                } else {
+                                    action_code = 1;
+                                    layer.msg(res.msg, {icon: 2, time: 2000});
+                                }
+                            }
+                        });
+                        layer.close(index2);
+                    }
+                });
+            },btn2: function(){
+                layer.confirm('确定回退到上个阶段？', {icon: 3, title:'提示'}, function(index3){
+                    if(action_code === 1) {
+                        action_code = 0;
+                        $.ajax({
+                            type: 'POST',
+                            url: '{:url("Admin/Business/conversion_back")}',
+                            data: {id:the_id},
+                            success: function (res) {
+                                if (res.code === 1) {
+                                    layer.msg(res.msg, {icon: 1, time: 2000}, function () {
+                                        location.reload();
+                                    });
+                                } else {
+                                    action_code = 1;
+                                    layer.msg(res.msg, {icon: 2, time: 2000});
+                                }
+                            }
+                        });
+                        layer.close(index3);
+                    }
+                });
+                return false;
+            }
+        });
+	    //隐藏通气转化按钮
+		if(the_status === 10){
+		    $(".layui-layer-btn0").css('display','none');
+		}
+        //切换合计用气量
+        $("#input-gas-num").on('change',function () {
+            var the_type = parseInt($(this).val());
+            var the_num = $(this).find("option:selected").attr('data-action');
+            var input_gas_num = $("#gas_num");
+            if(the_type === 9){
+                input_gas_num[0].style.display='block';
+                input_gas_num.val('');
+            }else{
+                input_gas_num[0].style.display='none';
+                input_gas_num.val(the_num);
+            }
+        })
+    })
+</script>
+</body>
+</html>
