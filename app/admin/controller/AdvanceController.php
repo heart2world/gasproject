@@ -312,14 +312,17 @@ class AdvanceController extends AdminBaseController
 
 
         foreach ($data as $key=>$item){
+            if (!is_numeric($item['receivable_amount'])){
+                $this->error("请输入正确的交款金额!");
+            }
             $item['receivable_time'] = strtotime($item['receivable_time']);
             isset($item['actual_time']) && $item['actual_time'] = strtotime($item['actual_time']);
             $data[$key]=$item;
         }
 
         $period_model =new CollectionPeriodModel;
-
         $result  = $period_model->isUpdate(true)->saveAll($data);
+
         if ($rem_ids){
             $period_model->whereIn('id',$rem_ids)->delete();
         }

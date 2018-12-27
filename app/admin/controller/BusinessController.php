@@ -9,6 +9,7 @@
 namespace app\admin\controller;
 
 
+use app\admin\api\DySms;
 use app\admin\model\BusinessGasModel;
 use app\admin\model\BusinessModel;
 use app\admin\model\BusinessNatureModel;
@@ -410,10 +411,11 @@ class BusinessController extends AdminBaseController
                 $result = $this->conversion_action($id, 7, $remark, $business['continuous_day']);//转化
                 if ($result == true) {
                     $businessModel->isUpdate(true)->save(array('id' => $id, 'status' => 7, 'continuous_day' => 0,'payment'=>$payment,'sms'=>$sms));//更新状态
+                    $msg = '';
                     if($business['type'] == 1 && $sms == 1){//预约业务发送短信
-
+                        $msg = $this->send_sms($business['contact_mobile'],$payment);
                     }
-                    $this->success("转化成功！", url("Business/index"));
+                    $this->success("转化成功！".$msg, url("Business/index"));
                 } else {
                     $this->error("转化失败！");
                 }
@@ -625,5 +627,21 @@ class BusinessController extends AdminBaseController
         }else{
             echo 'Oops, something went wrong.';
         }
+    }
+
+    //发送短信通知
+    private function send_sms($mobile,$money){
+        // 调用示例：
+        set_time_limit(0);
+        header('Content-Type: text/plain; charset=utf-8');
+
+        $response = DySms::sendSms('17782165085',$money);
+        $response = collection($response)->toArray();
+        if($response['Code'] != 'OK') {
+            $response['time'] = date('Y-m-d H:i:s');
+            file_put_contents(RUNTIME_PATH . 'sms/' . date('Ym') . 'sms_txt', var_export($response, true)."\n", FILE_APPEND);
+            return $response['Message'];
+        }
+        return '';
     }
 }
