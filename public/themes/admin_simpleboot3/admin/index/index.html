@@ -270,14 +270,12 @@
                 <!--</a>-->
             <!--</if>-->
 
-            <if condition="cmf_auth_check(cmf_get_current_admin_id(),'admin/Setting/clearcache')">
-                <a class="btn btn-sm btn-danger"
-                   href="javascript:openapp('{:url('admin/Setting/clearcache')}','index_clearcache','{:lang('ADMIN_SETTING_CLEARCACHE')}',true);"
-                   title="{:lang('ADMIN_SETTING_CLEARCACHE')}"
-                   data-toggle="tooltip">
-                    <i class="fa fa-trash-o"></i>
-                </a>
-            </if>
+            <a class="btn btn-sm btn-danger"
+               href="javascript:openapp('{:url('admin/Setting/clearcache')}','index_clearcache','{:lang('ADMIN_SETTING_CLEARCACHE')}',true);"
+               title="{:lang('ADMIN_SETTING_CLEARCACHE')}"
+               data-toggle="tooltip">
+                <i class="fa fa-trash-o"></i>
+            </a>
 
             <!--<if condition="cmf_auth_check(cmf_get_current_admin_id(),'admin/RecycleBin/index')">-->
                 <!--<a class="btn btn-sm btn-danger"-->

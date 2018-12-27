@@ -11,7 +11,7 @@
 
 /*
  * 数据库表
-CREATE TABLE `cmf_queue_jobs` (
+CREATE TABLE `gas_queue_jobs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `queue` varchar(255) NOT NULL,
   `payload` longtext NOT NULL,

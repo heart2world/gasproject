@@ -353,14 +353,21 @@
                             } else if (data.code == '0') {
                                 //art.dialog.alert(data.info);
                                 //alert(data.info);//暂时处理方案
-                                art.dialog({
-                                    content: data.msg,
-                                    icon: 'warning',
-                                    ok: function () {
-                                        this.title(data.msg);
-                                        return true;
-                                    }
-                                });
+                                // art.dialog({
+                                //     content: data.msg,
+                                //     icon: 'warning',
+                                //     ok: function () {
+                                //         this.title(data.msg);
+                                //         return true;
+                                //     }
+                                // });
+                                noty({
+                                    text: data.msg,
+                                    type: 'error',
+                                    layout: 'topCenter',
+                                    modal: true,
+                                    timeout: 800
+                                })
                             }
                         });
                     },
@@ -429,14 +436,21 @@
 
                                 } else if (data.code == 0) {
                                     //art.dialog.alert(data.info);
-                                    art.dialog({
-                                        content: data.msg,
-                                        icon: 'warning',
-                                        ok: function () {
-                                            this.title(data.msg);
-                                            return true;
-                                        }
-                                    });
+                                    // art.dialog({
+                                    //     content: data.msg,
+                                    //     icon: 'warning',
+                                    //     ok: function () {
+                                    //         this.title(data.msg);
+                                    //         return true;
+                                    //     }
+                                    // });
+                                    noty({
+                                        text: data.msg,
+                                        type: 'error',
+                                        layout: 'topCenter',
+                                        modal: true,
+                                        timeout: 800
+                                    })
                                 }
                             }
                         })

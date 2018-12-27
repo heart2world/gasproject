@@ -35,7 +35,11 @@
 					<if condition="$vo.step eq 1">
 						——
 						<else/>
-						{$vo.day}
+						<if condition="$limits eq 1 && $vo.day gt $vo.expected_day">
+							<span style="color: #FF0000;">{$vo.day}</span>
+							<else/>
+							{$vo.day}
+						</if>
 					</if>
 				</td>
 				<td>

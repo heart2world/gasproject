@@ -25,7 +25,7 @@
 					<td>{$vo.name}</td>
 					<td>{$vo.telephone}</td>
 					<td>
-						<a href='{:url("user/depart_edit",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a>
+						<a href='{:url("user/depart_edit",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a> /
 						<a class="js-ajax-delete" href="{:url('user/depart_delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
 					</td>
 				</tr>

@@ -43,7 +43,7 @@
 				<th>包含户数</th>
 				<th>受理时间</th>
 				<th>当前状态</th>
-				<th width="120">{:lang('ACTIONS')}</th>
+				<th width="130">{:lang('ACTIONS')}</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -64,11 +64,11 @@
 						{$vo.house_num}
 					</if>
 				</td>
-				<td><php>echo date('Y-m-d H:i:s',$vo['create_time']);</php></td>
+				<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
 				<td>{$vo.status_name}</td>
 				<td>
-					<a href='{:url("Business/info",array("id"=>$vo["id"]))}'>查看</a>
-					<a href='{:url("Business/business",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a>
+					<a href='{:url("Business/info",array("id"=>$vo["id"]))}'>查看</a> /
+					<a href='{:url("Business/business",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a> /
 					<a href='javascript:;' class="conversion" data-type="{$vo.type}" data-id="{$vo.id}" data-number="{$vo.number}" data-status="{$vo.status}" data-action="{$vo.status_name}">转化</a>
 				</td>
 			</tr>
@@ -134,7 +134,48 @@
                 '			<textarea class="form-control" style="resize:none;" id="remark" maxlength="100" placeholder="非必填"></textarea>' +
                 '		</div></div>' +
                 '</div>';
-		} else {
+		}else if (the_status === 6){
+            $btn = ["预算审核转化为合同办理","回退至预算"];
+            $action_url = '{:url("Admin/Business/conversion_verify")}';
+            $height = '400px';
+            if(the_type === 2){
+                $height = '350px';
+			}
+            html = '<div class="form-horizontal margin-top-20">' +
+                '<div class="form-group">' +
+                '		<label class="col-sm-4 control-label">当前业务编号:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<label class="form-control" style="border: none !important;">' + the_number + '</label>' +
+                '		</div>' +
+                '</div><div class="form-group">' +
+                '		<label class="col-sm-4 control-label">当前业务状态:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<label class="form-control" style="border: none !important;">' + the_status_name + '</label>' +
+                '		</div>' +
+                '</div><div class="form-group">' +
+                '		<label class="col-sm-4 control-label">缴费金额(元):</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<input type="text" class="form-control" id="payment" placeholder="请输入缴费金额">' +
+                '		</div>' +
+                '</div>';
+            if(the_type === 1) {
+                html+='<div class="form-group">' +
+                '		<label class="col-sm-4 control-label">是否发送短信:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<select id="sms" class="form-control">' +
+                '				<option value="0">否</option>' +
+                '				<option value="1">是</option>' +
+                '			</select>' +
+                '		</div>' +
+                '</div>';
+            }
+				html+='<div class="form-group">' +
+                '		<label for="expected_day" class="col-sm-4 control-label">备注:</label>' +
+                '		<div class="col-md-8 col-sm-10">' +
+                '			<textarea class="form-control" style="resize:none;" id="remark" maxlength="100" placeholder="非必填"></textarea>' +
+                '		</div></div>' +
+                '</div>';
+        }else {
 	        if(the_status === 1){
                 $btn = ["预约转化为现场初勘"];
                 $action_url = '{:url("Admin/Business/conversion_reservation")}';
@@ -151,9 +192,6 @@
             }else if(the_status === 5){
                 $btn = ["预算转化为预算审核","回退至设计"];
                 $action_url = '{:url("Admin/Business/conversion_budget")}';
-            }else if(the_status === 6){
-                $btn = ["预算审核转化为合同办理","回退至预算"];
-                $action_url = '{:url("Admin/Business/conversion_verify")}';
             }else if(the_status === 7){
                 $btn = ["合同办理转化为缴费","回退至预算审核"];
                 $action_url = '{:url("Admin/Business/conversion_contract")}';
@@ -190,7 +228,7 @@
             , type :1
             , area: [$width, $height]
             , btn: $btn
-            , yes: function () {
+            , yes: function (index) {
                 var remark = $("#remark").val().trim();
                 var dataInfo = {};
                 if(the_status === 2){
@@ -199,7 +237,15 @@
                     var input_gas_type = $("#input-gas-num").val();
                     var input_gas_num = $("#gas_num").val();
                     dataInfo = {id:the_id,remark:remark,number:input_number,house_num:input_house_num,gas_num:input_gas_num,gas_type:input_gas_type};
-				}else{
+				}else if (the_status === 6){
+                    var payment = $("#payment").val().trim();
+                    if(the_type === 1){
+                        var sms = $("#sms").val();
+                        dataInfo = {id:the_id,remark:remark,payment:payment,sms:sms};
+					}else{
+                        dataInfo = {id:the_id,remark:remark,payment:payment};
+					}
+                }else {
                     dataInfo = {id:the_id,remark:remark};
 				}
                 layer.confirm('确定转化到下个阶段？', {icon: 3, title:'提示'}, function(index2){
@@ -211,6 +257,7 @@
                             data: dataInfo,
                             success: function (res) {
                                 if (res.code === 1) {
+                                    layer.close(index);
                                     layer.msg(res.msg, {icon: 1, time: 2000}, function () {
                                         location.reload();
                                     });
@@ -223,7 +270,7 @@
                         layer.close(index2);
                     }
                 });
-            },btn2: function(){
+            },btn2: function(index){
                 layer.confirm('确定回退到上个阶段？', {icon: 3, title:'提示'}, function(index3){
                     if(action_code === 1) {
                         action_code = 0;
@@ -233,6 +280,7 @@
                             data: {id:the_id},
                             success: function (res) {
                                 if (res.code === 1) {
+                                    layer.close(index);
                                     layer.msg(res.msg, {icon: 1, time: 2000}, function () {
                                         location.reload();
                                     });

@@ -216,7 +216,7 @@ class BusinessController extends AdminBaseController
                 $this->error("当前业务信息不存在！");
             }
             if($business['type'] == 2 || $business['status'] >= 3) {
-                $result = $this->validate($this->request->param(), 'Business.formal');
+                $result = $this->validate($this->request->param(), 'Business.edit');
             }else{
                 $result = $this->validate($this->request->param(), 'Business.reservation');
             }
@@ -396,17 +396,27 @@ class BusinessController extends AdminBaseController
         if ($this->request->isPost()) {
             $id = $this->request->param('id', 0, 'intval');
             $remark = $this->request->param('remark',null);
+            $payment = $this->request->param('payment',0);
+            $sms = $this->request->param('sms',0,'intval');
             $businessModel = new BusinessModel();
             $business = $businessModel->where(array('id'=>$id,'status'=>6))->find();
             if(!$business){
                 $this->error("当前业务信息不存在或转化流程有误！");
             }
-            $result = $this->conversion_action($id,7,$remark,$business['continuous_day']);//转化
-            if ($result == true) {
-                $businessModel->isUpdate(true)->save(array('id'=>$id,'status'=>7,'continuous_day'=>0));//更新状态
-                $this->success("转化成功！", url("Business/index"));
-            } else {
-                $this->error("转化失败！");
+            $return = $this->validate($this->request->param(), 'Business.payment');
+            if ($return !== true) {
+                $this->error($return);
+            }else {
+                $result = $this->conversion_action($id, 7, $remark, $business['continuous_day']);//转化
+                if ($result == true) {
+                    $businessModel->isUpdate(true)->save(array('id' => $id, 'status' => 7, 'continuous_day' => 0,'payment'=>$payment,'sms'=>$sms));//更新状态
+                    if($business['type'] == 1 && $sms == 1){//预约业务发送短信
+
+                    }
+                    $this->success("转化成功！", url("Business/index"));
+                } else {
+                    $this->error("转化失败！");
+                }
             }
         }
     }
@@ -538,7 +548,15 @@ class BusinessController extends AdminBaseController
                     'status' => 2,
                     'continuous_day' => $continuous_day
                 ];
-            }else{
+            }elseif ($business['status'] == 7){
+                $dataInfo = [
+                    'id' => $id,
+                    'payment' => null,
+                    'sms' => 0,
+                    'status' => 6,
+                    'continuous_day' => $continuous_day
+                ];
+            }else {
                 $dataInfo = [
                     'id' => $id,
                     'status' => $business['status']-1,
@@ -558,7 +576,7 @@ class BusinessController extends AdminBaseController
 
     //流程时间管理
     public function time_list(){
-        //$this->timed_task();//触发队列任务
+//        $this->timed_task();//触发队列任务
         $businessTimeModel = new BusinessTimeModel();
         $list = $businessTimeModel->order('id ASC')->select();
         $this->assign("list",$list);

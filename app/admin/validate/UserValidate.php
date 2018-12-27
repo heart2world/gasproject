@@ -18,6 +18,7 @@ class UserValidate extends Validate
         'mobile' => 'require|unique:user,mobile|regex:/^1[3456789][0-9]{9}$/',
         'user_nickname'  => 'require',
         'department_id' => 'require',
+        'more' => 'require'
     ];
 
     protected $message = [
@@ -25,6 +26,7 @@ class UserValidate extends Validate
         'mobile.unique'  => '手机号已经存在',
         'mobile.regex'  => '请输入正确的手机号',
         'user_nickname.require' => '姓名不能为空',
-        'department_id.require' => '部门不能为空'
+        'department_id.require' => '部门不能为空',
+        'more.require' => '工作内容不能为空'
     ];
 }

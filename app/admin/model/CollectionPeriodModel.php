@@ -26,13 +26,17 @@ class CollectionPeriodModel extends Model
         //应收款统计
         $data['receivable_sum'] = $_money['receivable_sum'];
 
-        //当前期数计算
-        $curr = $this->where(["advance_id"=>$advance_id,'actual_time'=>0])->order('period')->value("period");
-        $curr_period = $curr?:$_money['period_count'];
-        $data['curr_period'] = $curr_period;
 
         //是否完成
-        $data["has_next"]=$curr?1:0;
+
+        $data["has_next"]=$this->where(["advance_id"=>$advance_id,'actual_time'=>0])->order('period')->value("period")?1:0;
+
+        //当前期数计算
+        $curr = $this->where(["advance_id"=>$advance_id,'actual_time'=>['>',0]])->order('period desc')->value("period");
+
+        $curr_period =  $data["has_next"]?($curr?:0):$_money['period_count'];
+        $data['curr_period'] = $curr_period;
+
         //实际收款统计
         $actual_sum = $this->where(['actual_time'=>['>',0] ,"advance_id"=>$advance_id])->sum('receivable_amount');
         $data['actual_sum'] = $actual_sum ;

@@ -6,7 +6,7 @@
 			<li class="active"><a href="{:url('user/index')}">{:lang('ADMIN_USER_INDEX')}</a></li>
 			<li><a href="{:url('user/add')}">新增员工</a></li>
 		</ul>
-        <form class="well form-inline margin-top-20" method="post" action="{:url('User/index')}">
+        <form class="well form-inline margin-top-20" method="post" autocomplete="off" action="{:url('User/index')}">
             文本搜索：
             <input type="text" class="form-control" name="keyword" style="width: 150px;" value="{:input('request.keyword/s','')}" placeholder="请输入姓名/手机号">
 			所在部门：
@@ -51,20 +51,20 @@
 					<td>{$user_statuses[$vo['user_status']]}</td>
 					<td>
 						<if condition="$vo['id'] eq 1 || $vo['id'] eq cmf_get_current_admin_id()">
-							<font color="#cccccc">{:lang('EDIT')}</font>
+							<font color="#cccccc">{:lang('EDIT')} /</font>
 							<if condition="$vo['user_status'] eq 1">
 								<font color="#cccccc">停用</font>
 							<else />
 								<font color="#cccccc">{:lang('ACTIVATE_USER')}</font>
 							</if>
 						<else />
-							<a href='{:url("user/edit",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a>
+							<a href='{:url("user/edit",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a> /
 							<if condition="$vo['user_status'] eq 1">
 								<a href="{:url('user/ban',array('id'=>$vo['id']))}" class="js-ajax-dialog-btn" data-msg="确定要停用该用户吗？">停用</a>
 							<else />
 								<a href="{:url('user/cancelban',array('id'=>$vo['id']))}" class="js-ajax-dialog-btn" data-msg="确定要启用该用户吗？">{:lang('ACTIVATE_USER')}</a>
 							</if>
-							<a href="{:url('user/reset_password',array('id'=>$vo['id']))}" class="js-ajax-dialog-btn" data-msg="确定要重置该用户密码？">重置密码</a>
+							/ <a href="{:url('user/reset_password',array('id'=>$vo['id']))}" class="js-ajax-dialog-btn" data-msg="确定要重置该用户密码？">重置密码</a>
 						</if>
 					</td>
 				</tr>

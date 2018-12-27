@@ -9,6 +9,18 @@
     #data_main .item{
         padding-bottom:10px ;
     }
+
+    .layui-layer-page .layui-layer-content {
+        position: relative;
+        padding: 20px;
+        line-height: 24px;
+        width: 260px;
+        word-break: break-all;
+        overflow: hidden;
+        font-size: 14px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
 </style>
 </head>
 <body>
@@ -65,6 +77,7 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <button type="submit" class="btn btn-primary js-ajax-submit">保存</button>
+                <a href="javascript:history.back(-1);" style="margin-left: 30px;" class="btn btn-default">取消</a>
             </div>
         </div>
     </form>
@@ -107,6 +120,8 @@
         layer.open({
             title: title,
             shadeClose:true,
+            type:1,
+            btn:["确定",'取消'],
             content:template($("#content").html(),{data:data}),
             yes:function (index) {
                 call(index,isEdit)
@@ -118,13 +133,27 @@
 
     function call(index,isEdit) {
        var data = $("#data_main").formData();
+       if (data.receivable_amount===""){
+           layer.msg("请填写预收款金额!",{icon:2});
+           return false;
+       }
+
+        if (!Number(data.receivable_amount)){
+            layer.msg("请填写正确的收款金额!",{icon:2});
+            return false;
+        }
+
+       if (data.receivable_time===""){
+           layer.msg("请选择应交款时间",{icon:2});
+           return false;
+       }
        if (typeof isEdit==='number'){
            app.list[isEdit] = data;
            app.$forceUpdate();
        } else{
            app.list = app.list.concat(data);
        }
-        layer.close(index);
+          layer.close(index);
     }
 
    function initDate(e) {
@@ -139,6 +168,7 @@
        data.list =  app.list;
        console.log(data);
        request({
+           loading:0,
            data: data
        });
        return false;

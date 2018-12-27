@@ -89,6 +89,27 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label class="col-sm-2 control-label">缴费金额(元)</label>
+			<div class="col-md-6 col-sm-10">
+				<if condition="$business.status egt 7">
+					<label class="form-control none_border">{$business.payment}</label>
+					<else/>
+					<label class="form-control none_border">——</label>
+				</if>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label">是否发送短信</label>
+			<div class="col-md-6 col-sm-10">
+				<if condition="$business.type eq 1 && $business.status egt 7">
+					<php>$sms_lists = array('0'=>'否','1'=>'是');</php>
+					<label class="form-control none_border">{$sms_lists[$business['sms']]}</label>
+					<else/>
+					<label class="form-control none_border">——</label>
+				</if>
+			</div>
+		</div>
+		<div class="form-group">
 			<div class="col-sm-offset-2 col-sm-10">
 				<a href="javascript:history.back(-1);" class="btn btn-default">返回</a>
 			</div>

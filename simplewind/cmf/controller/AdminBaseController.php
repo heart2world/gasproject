@@ -98,8 +98,9 @@ class AdminBaseController extends BaseController
         $notRequire = [
             "adminIndexindex",
             "adminMainindex",
+            "adminSettingclearcache",
             "adminSettingpassword",
-            "adminSettingpasswordPost",
+            "adminSettingpasswordpost",
             "adminUseraddPost",
             "adminUsereditPost",
             "AdminUserdepart_add_post",

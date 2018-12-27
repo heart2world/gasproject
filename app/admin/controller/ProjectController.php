@@ -63,12 +63,14 @@ class ProjectController extends AdminBaseController
             ($status == 1) ? $where['p.status'] = array('eq',$status) : $where['p.status'] = array('eq',0);
         }
 
+        $now_id = cmf_get_current_admin_id();
+
         $projectModel = new ProjectModel();
         $project = $projectModel->alias('p')
             ->join('gas_user u','u.id=p.user_id','LEFT')
             ->join('gas_user us','us.id=p.verify_user_id','LEFT')
             ->where($where)
-            ->order('p.create_time desc')
+            ->orderRaw("field(p.user_id,$now_id) desc,p.create_time desc")
             ->field('p.*,u.user_nickname,u.department_id,us.user_nickname verify_name')
             ->paginate(20);
         $project->appends([

@@ -40,8 +40,8 @@ class Work
         }else{
             if ($job->attempts() > 3) {
                 //通过这个方法可以检查这个任务已经重试了几次了
-                $info = 'Work job has been retried more than 3 times! time:'.date('Y-m-d H:i:s');
-                file_put_contents('queue.txt',var_export($info,true),FILE_APPEND);
+                $info = '任务执行失败,执行任务超过了3次,当前时间:'.date('Y-m-d H:i:s');
+                file_put_contents('queue.txt',var_export($info,true)."\n",FILE_APPEND);
                 //重新发布这个任务
                 //获取时间间隔
                 $distance3_time = $tomorrow_time-time();
@@ -60,6 +60,8 @@ class Work
         if($today_whether == 1){
             return true;
         }else{
+            $info = '休息日不任务执行,当前时间:'.date('Y-m-d H:i:s');
+            file_put_contents('queue.txt',var_export($info,true)."\n",FILE_APPEND);
             return false;
         }
     }
@@ -87,7 +89,8 @@ class Work
             }
             $businessModel->saveAll($dataArray);
         }
-        print("<info>Work Job Success. job time is: ".date('Y-m-d H:i:s')."</info> \n");
+        $info = "任务执行成功,当前时间:".date('Y-m-d H:i:s');
+        file_put_contents('queue.txt',var_export($info,true)."\n",FILE_APPEND);
         return true;
     }
 }

@@ -162,16 +162,17 @@ class StatisticalController extends AdminBaseController
      * @return \think\Response
      * @throws
      */
-    public function overtime(Request $request)
+    public function overtime()
     {
 
         $where = array();
         /*时间筛选*/
+        $param = $this->request->param();
         $startTime = empty($param['start_time']) ? 0 : strtotime($param['start_time']);
-        $endTime = empty($param['end_time']) ? 0 : strtotime($param['end_time']);
+        $endTime = empty($param['end_time']) ? 0 : strtotime($param['end_time']." 23:59:59");
 
         if (!empty($startTime) && !empty($endTime)) {
-            $where['p.create_time'] = [['>= time', $startTime], ['<= time', $endTime]];
+            $where['p.create_time'] = ['between time', [$startTime, $endTime]];
         } else {
             if (!empty($startTime)) {
                 $where['p.create_time'] = ['>= time', $startTime];
@@ -182,18 +183,23 @@ class StatisticalController extends AdminBaseController
         }
         $where['p.step'] = array('gt',1);
         $where['b.limit_type'] = array('eq',1);
-        $busM = new BusinessModel;
 
-        $list = $busM->alias('b')
-            ->field('b.name as username,u.user_nickname as manager_name,p.*')
-            ->join('business_process p', 'p.business_id=b.id')
-            ->join('user u', 'u.id= p.user_id')
+        $businessProcessModel = new BusinessProcessModel();
+        $list = $businessProcessModel->alias('p')
+            ->join('gas_business b','b.id=p.business_id','LEFT')
+            ->join('gas_user u','u.id=p.user_id','LEFT')
             ->where('p.day > p.expected_day')
             ->where($where)
             ->order('p.business_id desc')
-            ->select();
+            ->field('p.*,b.name as username,u.user_nickname as manager_name')
+            ->paginate(20);
+        $list->appends($param);
+        // 获取分页显示
+        $page = $list->render();
 
+        $this->assign("lists",$list->toArray()['data']);
         $this->assign('list', $list);
+        $this->assign("page",$page);
         return $this->fetch();
     }
 

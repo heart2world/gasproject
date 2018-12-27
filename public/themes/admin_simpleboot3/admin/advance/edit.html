@@ -11,6 +11,17 @@
 		color: #3498db;
 		cursor: pointer;
 	}
+	.layui-layer-page .layui-layer-content {
+		position: relative;
+		padding: 20px;
+		line-height: 24px;
+		width: 260px;
+		word-break: break-all;
+		overflow: hidden;
+		font-size: 14px;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
 </style>
 </head>
 <body>
@@ -73,17 +84,30 @@
 							<td>{{item.receivable_amount}} </td>
 							<td>{{item.receivable_time}} </td>
 							<td v-text="item.actual_time||'——'"></td>
-							<td><span @click="edit(index)">编辑</span> / <span @click="del(index)">删除</span></td>
-
+							<td><span @click="edit(index)">编辑</span><span v-show="!item.actual_time"> / <span @click="del(index)">删除</span></span></td>
 						</tr>
+						<tr v-show="list.length>0">
+							<td>总计</td>
+							<td v-text="countAmount()"></td>
+							<td>——</td>
+							<td>——</td>
+							<td>——</td>
+						</tr>
+
 						</tbody>
 					</table>
-					<button  type="button"  class="btn btn-primary" id="save">保存</button>
 			</div>
 		</div>
 		<div class="form-group">
 			<label  class="col-sm-2 control-label">负责人</label>
 			<div class="col-md-6 col-sm-10">{$manager_name}</div>
+		</div>
+		<div class="form-group">
+			<label  class="col-sm-2 control-label"></label>
+			<div class="col-md-6 col-sm-10">
+				<button  type="button"  class="btn btn-primary" id="save">保存</button>
+				<a href="javascript:history.back(-1);" style="margin-left: 30px;" class="btn btn-default">取消</a>
+			</div>
 		</div>
 	</form>
 </div>
@@ -97,11 +121,9 @@
 	<form id="data_main">
 		<input type="hidden" name="id" value="<%=data.id %>">
 		<div class="item">第 <%=data.period %> 期 <input type="hidden" name="period" value="<%=data.period%>"></div>
-		<div class="item"><label>输入应收账款额</label><input type="text" name="receivable_amount" class="form-control"  value="<%=data.receivable_amount%>" placeholder="输入应收账款额"></div>
+		<div class="item"><label>输入应收账款额</label><input type="number" name="receivable_amount" class="form-control"  value="<%=data.receivable_amount%>" placeholder="输入应收账款额"></div>
 		<div class="item"><label>应交款时间</label><input type="text" id="date" name="receivable_time" class="form-control"  value="<%=data.receivable_time%>" placeholder="应交款时间"  /></div>
-		<% if (data.actual_time){%>
 		<div class="item"><label>实际交款时间</label><input type="text" id="date_2" name="actual_time" class="form-control"  value="<%=data.actual_time%>" placeholder="实际交款实际"  /></div>
-		<% } %>
 	</form>
 </script>
 <assign name="action" value="$Request.controller"/>
@@ -113,12 +135,26 @@
         data: {list: []},
         methods:{
             del:function (index) {
-   	         var item= app.list.splice(index,1);
-   	         console.log(item[0])
+   	         	var item= app.list.splice(index,1);
+   	         	//console.log(item[0]);
+               // app.$forceUpdate();
+                var list = this.list;
+                list.forEach(function (item,i) {
+                    item.period=i+1;
+                    app.list[i]= item;
+                });
                 remove.push(item[0].id);
             },
             edit:function (index) {
                 modelBox("编辑收款期数",app.list[index],index);
+            },
+            countAmount:function () {
+                var sum = 0;
+                var list = this.list;
+                 list.forEach(function (item) {
+                     sum=sum+Number(item.receivable_amount)
+                 });
+				return sum.toFixed(2);
             }
         }
     });
@@ -130,16 +166,16 @@
 		data:{id:advance_id},
 		success:function (result) {
             result.forEach(function (item) {
-				item.actual_time = timeToDate(item.actual_time)
-				item.receivable_time = timeToDate(item.receivable_time)
+				item.actual_time = item.actual_time?timeToDate(item.actual_time):"";
+				item.receivable_time = timeToDate(item.receivable_time);
             });
             app.list = result;
         }
-	})
+	});
 
     function modelBox(title,data,isEdit) {
         layer.open({
-            title: title,  shadeClose:true,
+            title: title,  shadeClose:true,type:1,btn:["确定","取消"],
             content:template($("#content").html(),{data:data}),
             yes:function (index) {
                 call(index,isEdit)
@@ -152,7 +188,28 @@
 
     function call(index,isEdit) {
         var data = $("#data_main").formData();
+
+        if (data.receivable_amount===""){
+            layer.msg("请填写收款金额!",{icon:2});
+            return false;
+        }
+
+        if (!Number(data.receivable_amount)){
+            layer.msg("请填写正确的收款金额!",{icon:2});
+            return false;
+        }
+
+        if (data.receivable_time===""){
+            layer.msg("请选择应交款时间",{icon:2});
+            return false;
+        }
+
+
         if (typeof isEdit==='number'){
+            if ( app.list[isEdit].actual_time!=="" && data.actual_time===""){
+                layer.msg("请选择实际交款时间",{icon:2});
+                return false;
+            }
             app.list[isEdit] = data;
             app.$forceUpdate();
         } else{
@@ -168,14 +225,13 @@
     }
 
     $("#save").on("click",function () {
-        console.log(app.list,remove)
+        //console.log(app.list,remove);
         request({
 			url:'{:url("$action/update")}',
+			loading:0,
             data:{list:app.list,del:remove}
         });
     });
-
-
 
 </script>
 </body>

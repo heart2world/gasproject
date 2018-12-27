@@ -29,11 +29,14 @@
 <body>
 <div class="wrap">
     <div class="container">
+        <div class="logo">
+            <img src="/themes/admin_simpleboot3/public/assets/images/logo.png" alt="">
+            <div class="logo_title">涪陵燃气公司报装查询系统</div>
+        </div>
         <div class="row">
             <div class="login"><!--col-sm-4 col-sm-offset-4-->
-                <div class="icon"><img src="/themes/admin_simpleboot3/public/assets/images/fire.png" alt=""></div>
-                <h1 class="text-center">燃气报装查询系统</h1>
-                <form class="js-ajax-form" action="{:url('public/doLogin')}" method="post">
+                <div class="icon"><img src="/themes/admin_simpleboot3/public/assets/images/title_img.png" alt=""></div>
+                <form class="js-ajax-form" action="{:url('public/doLogin')}" autocomplete="off" method="post">
                     <div class="form-group">
                         <input type="text" id="input_username" autocomplete="off" class="form-control" name="username"
                                placeholder="{:lang('USERNAME_OR_EMAIL')}" title="{:lang('USERNAME_OR_EMAIL')}"

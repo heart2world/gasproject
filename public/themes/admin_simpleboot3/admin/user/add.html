@@ -10,7 +10,7 @@
 			<li><a href="{:url('user/index')}">{:lang('ADMIN_USER_INDEX')}</a></li>
 			<li class="active"><a href="{:url('user/add')}">新增员工</a></li>
 		</ul>
-		<form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('user/addPost')}">
+		<form method="post" class="form-horizontal js-ajax-form margin-top-20" autocomplete="off" action="{:url('user/addPost')}">
 			<div class="form-group">
 				<label for="input-mobile" class="col-sm-2 control-label"><span class="form-required">*</span>手机号</label>
 				<div class="col-md-6 col-sm-10">
@@ -35,7 +35,7 @@
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="input-more" class="col-sm-2 control-label">工作内容</label>
+				<label for="input-more" class="col-sm-2 control-label"><span class="form-required">*</span>工作内容</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" id="input-more" maxlength="100" name="more" placeholder="请输入工作内容">
 				</div>

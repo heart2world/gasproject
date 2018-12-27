@@ -235,7 +235,7 @@ class UserController extends AdminBaseController
                 //添加用户
                 $mobile = $this->request->param('mobile');
                 $_POST['user_login'] = $mobile;
-                $_POST['user_pass'] = cmf_password(substr($mobile,-6));
+                $_POST['user_pass'] = cmf_password('123456');
                 $_POST['create_time'] = time();
                 $userModel = new UserModel();
                 $user_id = $userModel->allowField(true)->insertGetId($_POST);
@@ -359,7 +359,6 @@ class UserController extends AdminBaseController
                     //更新用户
                     $mobile = $this->request->param('mobile');
                     $_POST['user_login'] = $mobile;
-                    $_POST['user_pass'] = cmf_password(substr($mobile,-6));
                     $userModel = new UserModel();
                     $res = $userModel->allowField(true)->isUpdate(true)->save($_POST);
                     if ($res !== false) {
@@ -418,9 +417,9 @@ class UserController extends AdminBaseController
             $this->error("不存在该用户信息！");
         }
         if ($user['id'] == 1) {//超级管理员
-            $userModel->isUpdate(true)->save(array('id'=>$user['id'],'user_pass'=>cmf_password('123456')));
+            $userModel->where(array('id'=>$user['id']))->setField('user_pass',cmf_password('123456'));
         } else {
-            $userModel->isUpdate(true)->save(array('id'=>$user['id'],'user_pass'=>cmf_password(substr($user['mobile'],-6))));
+            $userModel->where(array('id'=>$user['id']))->setField('user_pass',cmf_password('123456'));
         }
         $this->success("重置成功！");
     }

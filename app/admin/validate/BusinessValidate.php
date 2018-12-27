@@ -21,7 +21,8 @@ class BusinessValidate extends Validate
         'contact' => 'require',
         'contact_mobile'  => 'require|regex:\d{11}',
         'house_num' => 'require|regex:/^\d+$/',
-        'gas_num' => 'require|number|egt:0'
+        'gas_num' => 'require|number|egt:0',
+        'payment' => 'require|number|egt:0'
     ];
 
     protected $message = [
@@ -37,12 +38,17 @@ class BusinessValidate extends Validate
         'house_num.regex' => '包含户数只能为0或正整数',
         'gas_num.require' => '合计用气量不能为空',
         'gas_num.number' => '合计用气量只能为数字',
-        'gas_num.egt' => '合计用气量必须大于等于0'
+        'gas_num.egt' => '合计用气量必须大于等于0',
+        'payment.require' => '缴费金额不能为空',
+        'payment.number' => '缴费金额只能为数字',
+        'payment.egt' => '缴费金额必须大于等于0'
     ];
 
     protected $scene = [
         'reservation'  =>  ['name','address','contact','contact_mobile'],
-        'formal'  =>  ['number','name','address','contact','contact_mobile','house_num','gas_num'],
-        'conversion' => ['number','house_num','gas_num']
+        'formal'       =>  ['number','name','address','contact','contact_mobile','house_num','gas_num'],
+        'edit'         =>  ['name','address','contact','contact_mobile','house_num','gas_num'],
+        'conversion'   =>  ['number','house_num','gas_num'],
+        'payment'      =>  ['payment']
     ];
 }

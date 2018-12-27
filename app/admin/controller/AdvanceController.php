@@ -22,7 +22,6 @@ class AdvanceController extends AdminBaseController
     public function __construct(Request $request = null)
     {
         parent::__construct($request);
-
         $this->model= new AdvanceModel();
     }
 
@@ -174,9 +173,7 @@ class AdvanceController extends AdminBaseController
     public function read($id)
     {
         $data = $this->model->where('id',$id)->find();
-        if ($this->checkAuth($data['manager_id'])){
-            $this->error("你无权访问此页!");
-        }
+
         if ($data){
 
             $perModel =new CollectionPeriodModel;
@@ -254,9 +251,15 @@ class AdvanceController extends AdminBaseController
 
         $period_model =new CollectionPeriodModel;
 
+        $data = $this->model->get($id);
+
+        if ($this->checkAuth(@$data->manager_id)){
+
+            $this->error("你无权操作此数据!");
+        }
 
         $w = ["advance_id"=>$id,'actual_time'=>0 ];
-        //当前期
+        //下期
         $next_data = $period_model->where($w)->order('period')->find();
         //最后一期
         $last_period =  $period_model->where('advance_id',$id)->count();
@@ -301,6 +304,7 @@ class AdvanceController extends AdminBaseController
 
         $data = $request->param('list/a');
 
+
         if (count($data)<1){
             $this->error("提交失败! 请至少保留一条数据");
         }
@@ -309,7 +313,7 @@ class AdvanceController extends AdminBaseController
 
         foreach ($data as $key=>$item){
             $item['receivable_time'] = strtotime($item['receivable_time']);
-            $item['actual_time'] = strtotime($item['actual_time']);
+            isset($item['actual_time']) && $item['actual_time'] = strtotime($item['actual_time']);
             $data[$key]=$item;
         }
 
@@ -333,7 +337,10 @@ class AdvanceController extends AdminBaseController
      */
     public function delete($id)
     {
-
+        $data = $this->model->get($id);
+        if ($this->checkAuth(@$data->manager_id)){
+            $this->error("你无权删除此数据!");
+        }
         $result  =$this->model->where('id',$id)->delete();
 
         if ($result){
