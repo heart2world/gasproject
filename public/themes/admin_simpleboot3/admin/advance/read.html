@@ -55,6 +55,7 @@
 							<th>应收账款额</th>
 							<th>应交款时间</th>
 							<th>实际交款时间</th>
+							<th>备注</th>
 						</tr>
 						</thead>
 						<tbody>
@@ -65,11 +66,13 @@
 								<td>{$vo.receivable_amount}</td>
 								<td>{$vo['receivable_time']>0?date('Y-m-d',$vo['receivable_time']):'——'}</td>
 								<td>{$vo['actual_time']>0?date('Y-m-d',$vo['actual_time']):'——'}</td>
+								<td>{$vo.remark|default="暂无备注"}</td>
 							</tr>
 						</foreach>
 						<tr>
 							<td>总计</td>
 							<td>{$receivable_sum}</td>
+							<td>——</td>
 							<td>——</td>
 							<td>——</td>
 						</tr>

@@ -27,8 +27,15 @@
 		受理时间：
 		<input type="text" class="form-control" name="begin_time" id="begin_time" value="{:input('request.begin_time/s','')}" placeholder="开始时间">—
 		<input type="text" class="form-control" name="end_time" id="end_time" value="{:input('request.end_time/s','')}" placeholder="结束时间">
-		<input type="submit" class="btn btn-primary" value="搜索" />
 		<br><br>
+		用气性质：
+		<select name="nature" class="form-control">
+			<option value="">全部</option>
+			<foreach name="nature" item="vn">
+				<option value="{$vn.id}" <if condition="input('request.nature/s','') eq $vn.id">selected</if>>{$vn.name}</option>
+			</foreach>
+		</select>
+		<input type="submit" class="btn btn-primary" value="搜索" style="margin-right: 20px;" />
 		<a href="{:url('Business/reservation_add')}" class="btn btn-info" id="reservation" style="margin-right: 20px;">新增预约业务</a>
 		<a href="{:url('Business/formal_add')}" class="btn btn-success" id="formal" >新增正式申请业务</a>
 	</form>
@@ -41,14 +48,15 @@
 				<th>联系人</th>
 				<th>联系电话</th>
 				<th>包含户数</th>
+				<th>用气性质</th>
 				<th>受理时间</th>
 				<th>当前状态</th>
-				<th width="130">{:lang('ACTIONS')}</th>
+				<th width="180">{:lang('ACTIONS')}</th>
 			</tr>
 		</thead>
 		<tbody>
 		<if condition="empty($lists)">
-			<tr><td colspan="9">暂无数据~</td></tr>
+			<tr><td colspan="10">暂无数据~</td></tr>
 		</if>
 			<foreach name="business" item="vo">
 			<tr>
@@ -64,12 +72,16 @@
 						{$vo.house_num}
 					</if>
 				</td>
+				<td>{$vo.nature}</td>
 				<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
 				<td>{$vo.status_name}</td>
 				<td>
 					<a href='{:url("Business/info",array("id"=>$vo["id"]))}'>查看</a> /
 					<a href='{:url("Business/business",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a> /
 					<a href='javascript:;' class="conversion" data-type="{$vo.type}" data-id="{$vo.id}" data-number="{$vo.number}" data-status="{$vo.status}" data-action="{$vo.status_name}">转化</a>
+					<if condition="cmf_get_current_admin_id() eq 1">
+						/ <a href="{:url('Business/delete',array('id'=>$vo['id']))}" class="js-ajax-delete">{:lang('DELETE')}</a>
+					</if>
 				</td>
 			</tr>
 			</foreach>
@@ -134,9 +146,9 @@
                 '			<textarea class="form-control" style="resize:none;" id="remark" maxlength="100" placeholder="非必填"></textarea>' +
                 '		</div></div>' +
                 '</div>';
-		}else if (the_status === 6){
-            $btn = ["预算审核转化为合同办理","回退至预算"];
-            $action_url = '{:url("Admin/Business/conversion_verify")}';
+		}else if (the_status === 5){
+            $btn = ["预算转化为预算审核","回退至设计"];
+            $action_url = '{:url("Admin/Business/conversion_budget")}';
             $height = '400px';
             if(the_type === 2){
                 $height = '350px';
@@ -189,9 +201,9 @@
 			}else if(the_status === 4){
                 $btn = ["设计转化为预算","回退至受理正式申请"];
                 $action_url = '{:url("Admin/Business/conversion_design")}';
-            }else if(the_status === 5){
-                $btn = ["预算转化为预算审核","回退至设计"];
-                $action_url = '{:url("Admin/Business/conversion_budget")}';
+            }else if(the_status === 6){
+                $btn = ["预算审核转化为合同办理","回退至预算"];
+                $action_url = '{:url("Admin/Business/conversion_verify")}';
             }else if(the_status === 7){
                 $btn = ["合同办理转化为缴费","回退至预算审核"];
                 $action_url = '{:url("Admin/Business/conversion_contract")}';
@@ -237,7 +249,7 @@
                     var input_gas_type = $("#input-gas-num").val();
                     var input_gas_num = $("#gas_num").val();
                     dataInfo = {id:the_id,remark:remark,number:input_number,house_num:input_house_num,gas_num:input_gas_num,gas_type:input_gas_type};
-				}else if (the_status === 6){
+				}else if (the_status === 5){
                     var payment = $("#payment").val().trim();
                     if(the_type === 1){
                         var sms = $("#sms").val();

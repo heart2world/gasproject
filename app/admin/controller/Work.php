@@ -18,14 +18,15 @@ class Work
      * @param Job            $job      当前的任务对象
      * @param array|mixed    $data     发布任务时自定义的数据
      */
-    public function fire(Job $job,$data){
-        //获取明天凌晨1点时间戳
-        $tomorrow_time = strtotime(date('Y-m-d 01:00:00'))+86400;
+    public function fire(Job $job,$data){//执行当前队列时间为当天凌晨1点
+        //获取明天凌晨1分时间戳
+        $tomorrow_time = mktime(0, 0, 0, date('m'), date('d')+1, date('Y'))+60;;
         // 如有必要,可以根据业务需求和数据库中的最新数据,判断该任务是否仍有必要执行
         $isJobStillNeedToBeDone = $this->checkDatabaseToSeeIfJobNeedToBeDone();
         if(!$isJobStillNeedToBeDone){//如果当天不是工作日，则直接进入明天的任务
             //获取时间间隔
             $distance_time = $tomorrow_time-time();
+            $job->delete();
             $job->release($distance_time);
             return;
         }
@@ -36,6 +37,7 @@ class Work
             //获取时间间隔
             $distance2_time = $tomorrow_time-time();
             //如果任务执行成功，重发
+            $job->delete();
             $job->release($distance2_time);
         }else{
             if ($job->attempts() > 3) {
@@ -45,6 +47,7 @@ class Work
                 //重新发布这个任务
                 //获取时间间隔
                 $distance3_time = $tomorrow_time-time();
+                $job->delete();
                 $job->release($distance3_time); //$delay为延迟时间，表示该任务延迟几秒后再执行
             }
         }
@@ -73,7 +76,7 @@ class Work
      */
     private function doWorkJob() {
         // 根据消息中的数据进行实际的业务处理...
-        $now_day = strtotime(date('Y-m-d 00:00:00'));//当天时间戳
+        $now_day = mktime(0, 0, 0, date('m'), date('d'), date('Y'));//当天时间戳
         $businessModel = new BusinessModel();
         $where['status'] = array('in','2,3,4,5,6,7,8,9');//不是预约和通气两种状态
         $where['create_day'] = array('lt',$now_day);//创建时间小于今天

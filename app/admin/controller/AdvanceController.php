@@ -115,7 +115,7 @@ class AdvanceController extends AdminBaseController
             $this->error($vf);
         }
 
-       $business = BusinessModel::get(['number'=>$data['business_number']]);
+       $business = BusinessModel::where(['number'=>$data['business_number']])->count();
 
         if (empty($business)){
             $this->error('请输入正确的业务编号!');
@@ -210,7 +210,7 @@ class AdvanceController extends AdminBaseController
         }
         if ($this->request->isAjax()){
              return $perModel
-                 ->field('id,actual_time,period,receivable_amount,receivable_time')
+                 ->field('id,actual_time,period,receivable_amount,receivable_time,remark')
                  ->where('advance_id',$id)->order('period')
                  ->select();
         }

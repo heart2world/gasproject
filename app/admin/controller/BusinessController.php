@@ -51,6 +51,10 @@ class BusinessController extends AdminBaseController
         }elseif ($end_time > 0){
             $where['create_time'] = array('<= time',$end_time);
         }
+        $nature = $this->request->param('nature',0,'intval');
+        if($nature){
+            $where['nature_id'] = array('eq',$nature);
+        }
 
         $businessModel = new BusinessModel();
         $business = $businessModel->where($where)->order('status ASC,create_time DESC')->paginate(20);
@@ -58,18 +62,27 @@ class BusinessController extends AdminBaseController
             'keyword' => $keyword,
             'status' => $status,
             'begin_time' => $begin_times,
-            'end_time' => $end_times
+            'end_time' => $end_times,
+            'nature' => $nature
         ]);
         // 获取分页显示
         $page = $business->render();
         //获取状态列表
         $businessTimeModel = new BusinessTimeModel();
         $times = $businessTimeModel->order('id ASC')->select();
-        //匹配状态名称
+        //获取用气性质
+        $businessNatureModel = new BusinessNatureModel();
+        $natures = $businessNatureModel->select();
+        //匹配状态名称和用气性质
         foreach ($business as $k=>$v){
             foreach ($times as $m=>$n){
                 if($v['status'] == $n['id']){
                     $business[$k]['status_name'] = $n['name'];
+                }
+            }
+            foreach ($natures as $x=>$y){
+                if($v['nature_id'] == $y['id']){
+                    $business[$k]['nature'] = $y['name'];
                 }
             }
         }
@@ -81,6 +94,7 @@ class BusinessController extends AdminBaseController
         $this->assign("page",$page);
         $this->assign("times",$times);
         $this->assign("gas",json_encode($gas));
+        $this->assign("nature",$natures);
         return $this->fetch();
     }
 
@@ -377,17 +391,28 @@ class BusinessController extends AdminBaseController
         if ($this->request->isPost()) {
             $id = $this->request->param('id', 0, 'intval');
             $remark = $this->request->param('remark',null);
+            $payment = $this->request->param('payment',0);
+            $sms = $this->request->param('sms',0,'intval');
             $businessModel = new BusinessModel();
             $business = $businessModel->where(array('id'=>$id,'status'=>5))->find();
             if(!$business){
                 $this->error("当前业务信息不存在或转化流程有误！");
             }
-            $result = $this->conversion_action($id,6,$remark,$business['continuous_day']);//转化
-            if ($result == true) {
-                $businessModel->isUpdate(true)->save(array('id'=>$id,'status'=>6,'continuous_day'=>0));//更新状态
-                $this->success("转化成功！", url("Business/index"));
-            } else {
-                $this->error("转化失败！");
+            $return = $this->validate($this->request->param(), 'Business.payment');
+            if ($return !== true) {
+                $this->error($return);
+            }else {
+                $result = $this->conversion_action($id, 6, $remark, $business['continuous_day']);//转化
+                if ($result == true) {
+                    $businessModel->isUpdate(true)->save(array('id' => $id, 'status' => 6, 'continuous_day' => 0, 'payment' => $payment, 'sms' => $sms));//更新状态
+                    $msg = '';
+                    if ($business['type'] == 1 && $sms == 1) {//预约业务发送短信
+                        $msg = $this->send_sms($business['contact_mobile'], $payment);
+                    }
+                    $this->success("转化成功！" . $msg, url("Business/index"));
+                } else {
+                    $this->error("转化失败！");
+                }
             }
         }
     }
@@ -397,28 +422,18 @@ class BusinessController extends AdminBaseController
         if ($this->request->isPost()) {
             $id = $this->request->param('id', 0, 'intval');
             $remark = $this->request->param('remark',null);
-            $payment = $this->request->param('payment',0);
-            $sms = $this->request->param('sms',0,'intval');
             $businessModel = new BusinessModel();
             $business = $businessModel->where(array('id'=>$id,'status'=>6))->find();
             if(!$business){
                 $this->error("当前业务信息不存在或转化流程有误！");
             }
-            $return = $this->validate($this->request->param(), 'Business.payment');
-            if ($return !== true) {
-                $this->error($return);
-            }else {
-                $result = $this->conversion_action($id, 7, $remark, $business['continuous_day']);//转化
-                if ($result == true) {
-                    $businessModel->isUpdate(true)->save(array('id' => $id, 'status' => 7, 'continuous_day' => 0,'payment'=>$payment,'sms'=>$sms));//更新状态
-                    $msg = '';
-                    if($business['type'] == 1 && $sms == 1){//预约业务发送短信
-                        $msg = $this->send_sms($business['contact_mobile'],$payment);
-                    }
-                    $this->success("转化成功！".$msg, url("Business/index"));
-                } else {
-                    $this->error("转化失败！");
-                }
+            $result = $this->conversion_action($id, 7, $remark, $business['continuous_day']);//转化
+            if ($result == true) {
+                $businessModel->isUpdate(true)->save(array('id' => $id, 'status' => 7, 'continuous_day' => 0));//更新状态
+
+                $this->success("转化成功！", url("Business/index"));
+            } else {
+                $this->error("转化失败！");
             }
         }
     }
@@ -550,12 +565,12 @@ class BusinessController extends AdminBaseController
                     'status' => 2,
                     'continuous_day' => $continuous_day
                 ];
-            }elseif ($business['status'] == 7){
+            }elseif ($business['status'] == 6){
                 $dataInfo = [
                     'id' => $id,
                     'payment' => null,
                     'sms' => 0,
-                    'status' => 6,
+                    'status' => 5,
                     'continuous_day' => $continuous_day
                 ];
             }else {
@@ -617,8 +632,8 @@ class BusinessController extends AdminBaseController
         //   ( jobData 为对象时，需要在先在此处手动序列化，否则只存储其public属性的键值对)
         $jobData = array();
         // 4.将该任务推送到消息队列，等待对应的消费者去执行
-        //获取明天凌晨1点时间戳
-        $tomorrow_time = strtotime(date('Y-m-d 01:00:00'))+86400;
+        //获取明天凌晨1分时间戳
+        $tomorrow_time = mktime(0, 0, 0, date('m'), date('d')+1, date('Y'))+60;
         $distance = $tomorrow_time-time();
         $isPushed = Queue::later($distance,$jobHandlerClassName, $jobData, $jobQueueName);
         // database 驱动时，返回值为 1|false  ;   redis 驱动时，返回值为 随机字符串|false
@@ -635,7 +650,8 @@ class BusinessController extends AdminBaseController
         set_time_limit(0);
         header('Content-Type: text/plain; charset=utf-8');
 
-        $response = DySms::sendSms('17782165085',$money);
+        $money = number_format($money,2,'.','');
+        $response = DySms::sendSms($mobile,$money);
         $response = collection($response)->toArray();
         if($response['Code'] != 'OK') {
             $response['time'] = date('Y-m-d H:i:s');
@@ -643,5 +659,23 @@ class BusinessController extends AdminBaseController
             return $response['Message'];
         }
         return '';
+    }
+
+    //删除业务
+    public function delete(){
+        $id = $this->request->param('id', 0, 'intval');
+        $businessModel = new BusinessModel();
+        $business = $businessModel->find($id);
+        if(!$business){
+            $this->error("不存在该业务");
+        }
+        $return = $businessModel->where(array('id'=>$id))->delete();
+        if($return){
+            $businessProcessModel = new BusinessProcessModel();
+            $businessProcessModel->where(array('business_id'=>$id))->delete();
+            $this->success("删除成功");
+        }else{
+            $this->error("删除失败");
+        }
     }
 }

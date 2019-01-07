@@ -14,7 +14,7 @@
         position: relative;
         padding: 20px;
         line-height: 24px;
-        width: 260px;
+        width: 310px;
         word-break: break-all;
         overflow: hidden;
         font-size: 14px;
@@ -54,18 +54,20 @@
                             <th width="140"></th>
                             <th>应收账款额</th>
                             <th>应交款时间</th>
+                            <th>备注</th>
                             <th>操作</th>
                         </tr>
                     </thead>
                     <tbody v-cloak>
                         <tr v-if="list.length===0" style="background: #f5f5f5">
-                            <td colspan="4">暂无数据</td>
+                            <td colspan="5">暂无数据</td>
                         </tr>
                         <tr v-else v-for="(item,index) in list">
 
                             <td :data-id="item.period=(index+1)" > 第 {{item.period}} 期 </td>
                             <td>{{item.receivable_amount}} </td>
                             <td>{{item.receivable_time}} </td>
+                            <td>{{item.remark}} </td>
                             <td><span @click="edit(index)">编辑</span> / <span @click="del(index)">删除</span></td>
 
                         </tr>
@@ -90,6 +92,7 @@
         <div class="item">第 <%=data.period %> 期 <input type="hidden" name="period" value="<%=data.period%>"></div>
         <div class="item"><input type="number" autocomplete="off" name="receivable_amount" class="form-control"  value="<%=data.receivable_amount%>" placeholder="输入应收账款额"></div>
         <div class="item"><input type="text" autocomplete="off"  id="date" name="receivable_time" class="form-control"  value="<%=data.receivable_time%>" placeholder="应交款时间"  /></div>
+        <div class="item"><textarea  name="remark" placeholder="备注" class="form-control"><%=data.remark%></textarea></div>
     </form>
 </script>
 <script>
@@ -111,7 +114,7 @@
         if (period>10){
             layer.msg("最多添加10期!",{icon:2});return false;
         }
-        var data = {period: period, receivable_amount: "", receivable_time: ""};
+        var data = {period: period, receivable_amount: "", receivable_time: "",remark:""};
          modelBox("新增收款期数",data);
     });
 

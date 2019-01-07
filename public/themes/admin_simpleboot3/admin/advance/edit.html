@@ -15,7 +15,7 @@
 		position: relative;
 		padding: 20px;
 		line-height: 24px;
-		width: 260px;
+		width: 310px;
 		word-break: break-all;
 		overflow: hidden;
 		font-size: 14px;
@@ -71,6 +71,7 @@
 							<th>应收账款额</th>
 							<th>应交款时间</th>
 							<th>实际交款时间</th>
+							<th>备注</th>
 							<th>操作</th>
 						</tr>
 						</thead>
@@ -84,11 +85,13 @@
 							<td>{{item.receivable_amount}} </td>
 							<td>{{item.receivable_time}} </td>
 							<td v-text="item.actual_time||'——'"></td>
+							<td v-text="item.remark||'无'"></td>
 							<td><span @click="edit(index)">编辑</span><span v-show="!item.actual_time"> / <span @click="del(index)">删除</span></span></td>
 						</tr>
 						<tr v-show="list.length>0">
 							<td>总计</td>
 							<td v-text="countAmount()"></td>
+							<td>——</td>
 							<td>——</td>
 							<td>——</td>
 							<td>——</td>
@@ -124,6 +127,7 @@
 		<div class="item"><label>输入应收账款额</label><input type="number" name="receivable_amount" class="form-control"  value="<%=data.receivable_amount%>" placeholder="输入应收账款额"></div>
 		<div class="item"><label>应交款时间</label><input type="text" id="date" name="receivable_time" class="form-control"  value="<%=data.receivable_time%>" placeholder="应交款时间"  /></div>
 		<div class="item"><label>实际交款时间</label><input type="text" id="date_2" name="actual_time" class="form-control"  value="<%=data.actual_time%>" placeholder="实际交款实际"  /></div>
+		<div class="item"><label>备注</label><textarea  name="remark" placeholder="备注" class="form-control"><%=data.remark%></textarea></div>
 	</form>
 </script>
 <assign name="action" value="$Request.controller"/>
@@ -213,7 +217,9 @@
             app.list[isEdit] = data;
             app.$forceUpdate();
         } else{
+
             app.list = app.list.concat(data);
+            console.log(  app.list)
         }
         layer.close(index);
     }
@@ -232,7 +238,6 @@
             data:{list:app.list,del:remove}
         });
     });
-
 </script>
 </body>
 </html>
