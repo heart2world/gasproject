@@ -51,12 +51,13 @@
 				<th>用气性质</th>
 				<th>受理时间</th>
 				<th>当前状态</th>
+				<th>备注</th>
 				<th width="180">{:lang('ACTIONS')}</th>
 			</tr>
 		</thead>
 		<tbody>
 		<if condition="empty($lists)">
-			<tr><td colspan="10">暂无数据~</td></tr>
+			<tr><td colspan="11">暂无数据~</td></tr>
 		</if>
 			<foreach name="business" item="vo">
 			<tr>
@@ -75,6 +76,7 @@
 				<td>{$vo.nature}</td>
 				<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
 				<td>{$vo.status_name}</td>
+				<td>{$vo.remark}</td>
 				<td>
 					<a href='{:url("Business/info",array("id"=>$vo["id"]))}'>查看</a> /
 					<a href='{:url("Business/business",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a> /

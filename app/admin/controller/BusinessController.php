@@ -74,6 +74,7 @@ class BusinessController extends AdminBaseController
         $businessNatureModel = new BusinessNatureModel();
         $natures = $businessNatureModel->select();
         //匹配状态名称和用气性质
+        $businessProcessModel = new BusinessProcessModel();
         foreach ($business as $k=>$v){
             foreach ($times as $m=>$n){
                 if($v['status'] == $n['id']){
@@ -85,6 +86,8 @@ class BusinessController extends AdminBaseController
                     $business[$k]['nature'] = $y['name'];
                 }
             }
+            $process = $businessProcessModel->where(array('business_id'=>$v['id']))->order('create_time desc')->limit(1)->find();
+            $business[$k]['remark'] = $process['remark'];
         }
         //获取用气量列表
         $businessGasModel = new BusinessGasModel();
@@ -535,10 +538,10 @@ class BusinessController extends AdminBaseController
     //回退流程
     public function conversion_back(){
         if ($this->request->isPost()) {
-            $now_id = intval(cmf_get_current_admin_id());
-            if($now_id !== 1){
-                $this->error("仅超级管理员才能进行该操作！");
-            }
+//            $now_id = intval(cmf_get_current_admin_id());
+//            if($now_id !== 1){
+//                $this->error("仅超级管理员才能进行该操作！");
+//            }
             $id = $this->request->param('id', 0, 'intval');
             $where['id'] = array('eq',$id);
             $where['status'] = array('neq',1);

@@ -78,7 +78,7 @@ class Work
         // 根据消息中的数据进行实际的业务处理...
         $now_day = mktime(0, 0, 0, date('m'), date('d'), date('Y'));//当天时间戳
         $businessModel = new BusinessModel();
-        $where['status'] = array('in','2,3,4,5,6,7,8,9');//不是预约和通气两种状态
+        $where['status'] = array('in','1,2,3,4,5,6,7,8,9');//不是通气状态
         $where['create_day'] = array('lt',$now_day);//创建时间小于今天
         $business = $businessModel->where($where)->select();
         if(count($business) > 0){//如果有数据

@@ -111,8 +111,7 @@ class AdminBaseController extends BaseController
             "AdminBusinessformal_add_post",
             "AdminBusinessbusiness_post",
             "AdminBusinessinfo",
-            "AdminBusinesstime_post",
-            "AdminBusinessconversion_back"
+            "AdminBusinesstime_post"
         ];
         if (!in_array($rule, $notRequire)) {
             return cmf_auth_check($userId);
